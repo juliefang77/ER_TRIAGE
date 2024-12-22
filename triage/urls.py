@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from . import views
 from . import apisaas
+from . import apipatient 
 
 router = DefaultRouter()
 
@@ -12,4 +13,14 @@ router.register(r'triage', apisaas.SaaSTriageViewSet, basename='saas-triage')
 router.register(r'vitals', apisaas.SaaSVitalSignsViewSet, basename='saas-vitals')
 router.register(r'staff', apisaas.SaaSMedicalStaffViewSet, basename='saas-staff')
 
-urlpatterns = router.urls
+# Patient app endpoints
+router_patient = DefaultRouter()
+router_patient.register(r'patients', apipatient.PatientAppPatientViewSet, basename='app-patient')
+router_patient.register(r'triage', apipatient.PatientAppTriageViewSet, basename='app-triage')
+router_patient.register(r'vitals', apipatient.PatientAppVitalSignsViewSet, basename='app-vitals')
+
+urlpatterns = [
+    path('', include(router.urls)),
+    path('apipatient/', include(router_patient.urls)),
+]
+

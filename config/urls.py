@@ -23,4 +23,5 @@ urlpatterns = [
     path('', lambda request: redirect('admin/'), name='root'),
     path('triage/', include('triage.urls')),
     path('apisaas/', include('triage.urls')), 
+    path('apipatient/', include('triage.urls')), 
 ]
