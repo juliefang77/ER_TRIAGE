@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Patient, TriageRecord, VitalSigns, MedicalStaff
+from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff
 
 class VitalSignsInline(admin.StackedInline):
     model = VitalSigns
@@ -20,6 +20,27 @@ class VitalSignsInline(admin.StackedInline):
         }),
         ('其他', {
             'fields': ['blood_glucose']
+        })
+    ]
+
+class TriageResultInline(admin.StackedInline):
+    model = TriageResult
+    fieldsets = [
+        ('分诊结果', {
+            'fields': [
+                ('priority_level', 'area'),
+                'status',
+                'treatment_area',
+                'department',
+                'preliminary_diagnosis'
+            ]
+        }),
+        ('转诊与复诊', {
+            'fields': [
+                'transfer_status',
+                'followup_type',
+                'followup_notes'
+            ]
         })
     ]
 
@@ -53,10 +74,11 @@ class MedicalStaffAdmin(admin.ModelAdmin):
     search_fields = ['name', 'staff_id']
 
 class TriageRecordAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'registration_time', 'priority_level', 'area', 'status', 'department')
-    list_filter = ['priority_level', 'area', 'status', 'treatment_area']
-    search_fields = ['patient__name_chinese', 'patient__id_number', 'preliminary_diagnosis']
-    inlines = [VitalSignsInline]
+    list_display = ('patient', 'registration_time', 'get_priority_level', 'get_area', 'get_status', 'get_department')
+    list_filter = ['result__priority_level', 'result__area', 'result__status', 'result__treatment_area']
+    search_fields = ['patient__name_chinese', 'patient__id_number', 'result__preliminary_diagnosis']
+    inlines = [VitalSignsInline, TriageResultInline]
+    
     fieldsets = [
         ('患者信息', {
             'fields': ['patient']
@@ -65,31 +87,32 @@ class TriageRecordAdmin(admin.ModelAdmin):
             'fields': [
                 'arrival_time',
                 'arrival_method',
-                ('priority_level', 'area'),
-                'status',
                 'nurse'
-            ]
-        }),
-        ('就诊安排', {
-            'fields': [
-                'treatment_area',
-                'department',
-                'preliminary_diagnosis'
             ]
         }),
         ('病情描述', {
             'fields': ['chief_complaint', 'medical_history']
-        }),
-        ('转诊与复诊', {
-            'fields': [
-                'transfer_status',
-                'followup_type',
-                'followup_notes'
-            ]
         })
     ]
 
-# Register all models with their admin classes
+    def get_priority_level(self, obj):
+        return obj.result.priority_level if obj.result else None
+    get_priority_level.short_description = '分诊等级'
+
+    def get_area(self, obj):
+        return obj.result.area if obj.result else None
+    get_area.short_description = '分区'
+
+    def get_status(self, obj):
+        return obj.result.status if obj.result else None
+    get_status.short_description = '状态'
+
+    def get_department(self, obj):
+        return obj.result.department if obj.result else None
+    get_department.short_description = '科室'
+
+# Register all models
 admin.site.register(Patient, PatientAdmin)
 admin.site.register(TriageRecord, TriageRecordAdmin)
 admin.site.register(MedicalStaff, MedicalStaffAdmin)
+admin.site.register(TriageResult)  # Added this

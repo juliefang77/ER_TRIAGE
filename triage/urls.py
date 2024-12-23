@@ -13,6 +13,10 @@ router.register(r'triage', apisaas.SaaSTriageViewSet, basename='saas-triage')
 router.register(r'vitals', apisaas.SaaSVitalSignsViewSet, basename='saas-vitals')
 router.register(r'staff', apisaas.SaaSMedicalStaffViewSet, basename='saas-staff')
 
+# SaaS: New endpoints for triage results and history
+router.register(r'triageresults', apisaas.SaaSTriageResultViewSet, basename='saas-triage-results')
+router.register(r'triagehistory', apisaas.TriageHistoryViewSet, basename='saas-triage-history')
+
 # Patient app endpoints
 router_patient = DefaultRouter()
 router_patient.register(r'patients', apipatient.PatientAppPatientViewSet, basename='app-patient')

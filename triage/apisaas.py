@@ -44,6 +44,7 @@ class TriageHistoryViewSet(viewsets.ModelViewSet):
             'patient',
             'nurse',
             'result',
-            'vital_signs'
+            'vitalsigns'
         )
         return queryset
+    
