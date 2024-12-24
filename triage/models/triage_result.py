@@ -30,7 +30,9 @@ class TriageResult(models.Model):
     triage_record = models.OneToOneField(
         TriageRecord,
         on_delete=models.PROTECT,
-        related_name='result'
+        related_name='result',
+        null=True,
+        blank=True
     )
 
     status = models.CharField(
@@ -42,20 +44,28 @@ class TriageResult(models.Model):
             ('LEFT', '离开'),
         ],
         default='WAITING',
-        verbose_name='状态'
+        verbose_name='状态',
+        null=True,
+        blank=True
     )
     
     priority_level = models.IntegerField(
         choices=PRIORITY_LEVELS, 
         default=4,
-        verbose_name='分诊等级'
+        verbose_name='分诊等级',
+        null=True,
+        blank=True
     )
+
     area = models.CharField(
         max_length=6, 
         choices=AREAS, 
         default='GREEN',
-        verbose_name='分区'
+        verbose_name='分区',
+        null=True,
+        blank=True
     )
+
     treatment_area = models.CharField(
         max_length=5,
         choices=TREATMENT_AREAS,
@@ -63,23 +73,29 @@ class TriageResult(models.Model):
         null=True,
         blank=True
     )
+
     department = models.CharField(
         max_length=50,
         verbose_name='分诊科室',
         null=True,
         blank=True
     )
+
     preliminary_diagnosis = models.TextField(
         verbose_name='初步诊断',
         null=True,
         blank=True
     )
+
     transfer_status = models.CharField(
         max_length=4,
         choices=TRANSFER_CHOICES,
         default='NONE',
-        verbose_name='转诊安排'
+        verbose_name='转诊安排',
+        null=True,
+        blank=True
     )
+
     followup_type = models.CharField(
         max_length=10,
         choices=[
@@ -88,9 +104,18 @@ class TriageResult(models.Model):
             ('OFFLINE', '线下复诊'),
         ],
         default='NONE',
-        verbose_name='复诊安排'
+        verbose_name='复诊安排',
+        null=True,
+        blank=True
     )
-    followup_notes = models.TextField(verbose_name='复诊备注', null=True, blank=True)
+
+    followup_notes = models.TextField(
+        verbose_name='复诊备注', 
+        null=True, 
+        blank=True
+    )
 
     def __str__(self):
-        return f"Result for {self.triage_record}"
+        if self.triage_record:
+            return f"Result for {self.triage_record}"
+        return "Triage Result"

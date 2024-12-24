@@ -46,12 +46,12 @@ class TriageResultInline(admin.StackedInline):
     ]
 
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('name_chinese', 'pinyin_name', 'gender', 'date_of_birth', 'phone')
+    list_display = ('name_chinese', 'gender', 'date_of_birth', 'phone')
     search_fields = ['name_chinese', 'id_number', 'phone']
     fieldsets = [
         ('基本信息', {
             'fields': [
-                ('name_chinese', 'pinyin_name'),
+                'name_chinese',
                 ('gender', 'date_of_birth'),
                 ('id_type', 'id_number'), 
                 'blood_type'
@@ -83,7 +83,7 @@ class TriageRecordAdmin(admin.ModelAdmin):
     
      # Enhanced filters
     list_filter = [
-        # ('registration_time', admin.DateFieldListFilter),
+        ('registration_time', admin.DateFieldListFilter),  # Uncomment this
         'result__priority_level',
         'result__area',
         'result__status',
@@ -93,14 +93,10 @@ class TriageRecordAdmin(admin.ModelAdmin):
     ]
 
     # Enhanced search
-    search_fields = [
-        'patient__name_chinese',
-        'patient__id_number',
-        'result__preliminary_diagnosis',
-        'chief_complaint',
-        'medical_history'
-    ]
+    search_fields = ['patient__name_chinese', 'patient__id_number']  # Enable searching by patient name and ID
 
+    raw_id_fields = ['patient', 'nurse']  # Adds a lookup widget for selecting patients
+    
     inlines = [VitalSignsInline, TriageResultInline]
     
     fieldsets = [
@@ -109,6 +105,7 @@ class TriageRecordAdmin(admin.ModelAdmin):
         }),
         ('分诊信息', {
             'fields': [
+                'registration_time',  # Add this back
                 'arrival_time',
                 'arrival_method',
                 'nurse'
@@ -155,11 +152,11 @@ class TriageResultAdmin(admin.ModelAdmin):
         'triage_record__patient__name_chinese',
         'department'
     ]
-    date_hierarchy = 'triage_record__registration_time'
     
     fieldsets = [
         ('分诊结果', {
             'fields': [
+                'triage_record',  # Add this field
                 ('priority_level', 'area'),
                 'status',
                 'treatment_area',
