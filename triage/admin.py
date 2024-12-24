@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils import timezone  # Add this import
 from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff
 
 class VitalSignsInline(admin.StackedInline):
@@ -74,9 +75,32 @@ class MedicalStaffAdmin(admin.ModelAdmin):
     search_fields = ['name', 'staff_id']
 
 class TriageRecordAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'registration_time', 'get_priority_level', 'get_area', 'get_status', 'get_department')
-    list_filter = ['result__priority_level', 'result__area', 'result__status', 'result__treatment_area']
-    search_fields = ['patient__name_chinese', 'patient__id_number', 'result__preliminary_diagnosis']
+    # Remove registration_time from list_display temporarily
+    list_display = ('patient', 'get_priority_level', 'get_area', 'get_status', 'get_department')
+
+    # Add date hierarchy for better date navigation
+    # date_hierarchy = 'registration_time'
+    
+     # Enhanced filters
+    list_filter = [
+        # ('registration_time', admin.DateFieldListFilter),
+        'result__priority_level',
+        'result__area',
+        'result__status',
+        'result__department',
+        'result__treatment_area',
+        'nurse__department'
+    ]
+
+    # Enhanced search
+    search_fields = [
+        'patient__name_chinese',
+        'patient__id_number',
+        'result__preliminary_diagnosis',
+        'chief_complaint',
+        'medical_history'
+    ]
+
     inlines = [VitalSignsInline, TriageResultInline]
     
     fieldsets = [
@@ -111,8 +135,49 @@ class TriageRecordAdmin(admin.ModelAdmin):
         return obj.result.department if obj.result else None
     get_department.short_description = '科室'
 
+    # def get_registration_time(self, obj):
+        #if obj.registration_time:
+            #return timezone.localtime(obj.registration_time).strftime("%Y-%m-%d %H:%M:%S")
+        #return None
+    #get_registration_time.short_description = '登记时间'
+
+class TriageResultAdmin(admin.ModelAdmin):
+    list_display = ['triage_record', 'priority_level', 'area', 'status', 'department']
+    list_filter = [
+        'priority_level',
+        'area',
+        'status',
+        'department',
+        'treatment_area'
+    ]
+    search_fields = [
+        'preliminary_diagnosis',
+        'triage_record__patient__name_chinese',
+        'department'
+    ]
+    date_hierarchy = 'triage_record__registration_time'
+    
+    fieldsets = [
+        ('分诊结果', {
+            'fields': [
+                ('priority_level', 'area'),
+                'status',
+                'treatment_area',
+                'department',
+                'preliminary_diagnosis'
+            ]
+        }),
+        ('转诊与复诊', {
+            'fields': [
+                'transfer_status',
+                'followup_type',
+                'followup_notes'
+            ]
+        })
+    ]
+
 # Register all models
 admin.site.register(Patient, PatientAdmin)
 admin.site.register(TriageRecord, TriageRecordAdmin)
 admin.site.register(MedicalStaff, MedicalStaffAdmin)
-admin.site.register(TriageResult)  # Added this
+admin.site.register(TriageResult, TriageResultAdmin)  # Add TriageResultAdmin here

@@ -12,7 +12,7 @@ class TriageResult(models.Model):
     AREAS = (
         ('RED', '红区'),
         ('YELLOW', '黄区'),
-        ('GREEN', '绵区')
+        ('GREEN', '绿区')
     )
 
     TREATMENT_AREAS = [
