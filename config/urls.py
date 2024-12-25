@@ -22,6 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', lambda request: redirect('admin/'), name='root'),
     path('triage/', include('triage.urls')),
-    path('apisaas/', include('triage.urls')), 
-    path('apipatient/', include('triage.urls')), 
+    path('apisaas/', include('triage.urls')),  
+    path('apipatient/', include('patient_portal.urls')),  # This will use patient_portal's URLs
 ]
