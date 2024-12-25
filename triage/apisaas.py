@@ -7,7 +7,6 @@ from .serializers import (
     TriageResultSerializer,
     VitalSignsSerializer,
     MedicalStaffSerializer,
-    TriageHistorySerializer
 )
 from .filters import TriageRecordFilter
 
@@ -28,7 +27,7 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
             'patient',
             'nurse',
             'result',
-            'vitalsigns'
+            'vital_signs'
         ).all()
 
     # Keep your existing perform_create method

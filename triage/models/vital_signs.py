@@ -5,6 +5,7 @@ class VitalSigns(models.Model):
     triage_record = models.OneToOneField(
         TriageRecord, 
         on_delete=models.CASCADE,
+        related_name='vitalsigns',  # Add this to match select_related
         null=True,  # Added null=True
         blank=True  # Added blank=True
     )
