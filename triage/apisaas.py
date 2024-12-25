@@ -18,7 +18,20 @@ class SaaSPatientViewSet(viewsets.ModelViewSet):
 class SaaSTriageViewSet(viewsets.ModelViewSet):
     queryset = TriageRecord.objects.all()
     serializer_class = TriageRecordSerializer
+    # Add these lines for filtering
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TriageRecordFilter
 
+    def get_queryset(self):
+        # Optimize queries with select_related
+        return TriageRecord.objects.select_related(
+            'patient',
+            'nurse',
+            'result',
+            'vitalsigns'
+        ).all()
+
+    # Keep your existing perform_create method
     def perform_create(self, serializer):
         # Get all data from request
         patient_data = self.request.data.get('patient_data')
@@ -31,7 +44,6 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
             defaults={
                 'name_chinese': patient_data.get('name_chinese'),
                 'id_type': patient_data.get('id_type'),
-                # Add other patient fields as needed
             }
         )
 
@@ -66,20 +78,4 @@ class SaaSMedicalStaffViewSet(viewsets.ModelViewSet):
     queryset = MedicalStaff.objects.all()
     serializer_class = MedicalStaffSerializer
 
-# New ViewSet for triage history with filtering
-class TriageHistoryViewSet(viewsets.ModelViewSet):
-    serializer_class = TriageHistorySerializer
-    filterset_class = TriageRecordFilter
-    filter_backends = [DjangoFilterBackend]
-    
-    def get_queryset(self):
-        queryset = TriageRecord.objects.all()
-        # Include related data to avoid N+1 queries
-        queryset = queryset.select_related(
-            'patient',
-            'nurse',
-            'result',
-            'vitalsigns'
-        )
-        return queryset
     
