@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 class MedicalStaff(models.Model):
     ROLE_CHOICES = [
@@ -6,6 +7,21 @@ class MedicalStaff(models.Model):
         ('NUR', '护士'),
         ('ADM', '管理员'),
     ]
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        verbose_name='唯一标识'
+    )
+    hospital = models.ForeignKey(
+        'HospitalUser',
+        on_delete=models.CASCADE,
+        related_name='staff',
+        null=True, # Nullable for now
+        blank=True,
+        verbose_name='所属医院'
+    )
 
     staff_id = models.CharField(max_length=10, unique=True, verbose_name='工号')
     name = models.CharField(max_length=50, verbose_name='姓名', null=True, blank=True)
@@ -23,4 +39,19 @@ class MedicalStaff(models.Model):
     class Meta:
         verbose_name = '医护人员'
         verbose_name_plural = '医护人员'
-        
+
+# MedicalStaff Table Relations:
+# - Links to HospitalUser (ForeignKey)
+# - Has many TriageRecords (reverse relation)
+
+# Fields:
+# 1. id | 唯一标识 | UUIDField (primary key)
+# 2. hospital | 所属医院 | ForeignKey (HospitalUser)
+# 3. staff_id | 工号 | CharField (unique)
+# 4. name | 姓名 | CharField
+# 5. role | 角色 | CharField (choices)
+# 6. department | 科室 | CharField
+
+# Meta:
+# verbose_name: 医护人员
+# verbose_name_plural: 医护人员

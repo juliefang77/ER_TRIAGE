@@ -21,11 +21,20 @@ class TriageResult(models.Model):
         ('TREAT', '诊疗区'),
     ]
 
-    TRANSFER_CHOICES = [
+    TRANSFER_STATUS_CHOICES = [
         ('NONE', '无需转诊'),
-        ('UP', '向上级医院转诊'),
-        ('DOWN', '向下级医院转诊'),
+        ('HIGHER', '向上级医院转诊'),
+        ('LOWER', '向下级医院转诊')
     ]
+
+    TRIAGE_GROUP_CHOICES = [
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5')
+    ]
+
 
     triage_record = models.OneToOneField(
         TriageRecord,
@@ -35,12 +44,12 @@ class TriageResult(models.Model):
         blank=True
     )
 
-    status = models.CharField(
+    triage_status = models.CharField(
         max_length=15,
         choices=[
-            ('WAITING', '等候中'),
-            ('IN_PROGRESS', '就诊中'),
-            ('COMPLETED', '已完成'),
+            ('WAITING', '未分诊'),
+            ('IN_PROGRESS', '已分诊'),
+            ('COMPLETED', '已就医'),
             ('LEFT', '离开'),
         ],
         default='WAITING',
@@ -57,7 +66,7 @@ class TriageResult(models.Model):
         blank=True
     )
 
-    area = models.CharField(
+    triage_area = models.CharField(
         max_length=6, 
         choices=AREAS, 
         default='GREEN',
@@ -81,20 +90,53 @@ class TriageResult(models.Model):
         blank=True
     )
 
+    #patient_nextstep 患者去向
+    #transfer_status 转诊安排
+    #transfer_hospital 转诊医院
+    #transfer_reason 转诊原因
+    #triage_group 组别 
+    patient_nextstep = models.TextField(
+        verbose_name='患者去向',
+        null=True,
+        blank=True
+    )
+
+    transfer_status = models.CharField(
+        max_length=20,
+        verbose_name='转诊安排',
+        choices=TRANSFER_STATUS_CHOICES,
+        null=True,
+        blank=True
+    )
+
+    transfer_hospital = models.CharField(
+        max_length=100,
+        verbose_name='转诊医院',
+        null=True,
+        blank=True
+    )
+
+    transfer_reason = models.TextField(
+        verbose_name='转诊原因',
+        null=True,
+        blank=True
+    )
+
+    triage_group = models.CharField(
+        max_length=1,
+        verbose_name='组别',
+        choices=TRIAGE_GROUP_CHOICES,
+        null=True,
+        blank=True
+    )
+
+
     preliminary_diagnosis = models.TextField(
         verbose_name='初步诊断',
         null=True,
         blank=True
     )
 
-    transfer_status = models.CharField(
-        max_length=4,
-        choices=TRANSFER_CHOICES,
-        default='NONE',
-        verbose_name='转诊安排',
-        null=True,
-        blank=True
-    )
 
     followup_type = models.CharField(
         max_length=10,
@@ -109,7 +151,7 @@ class TriageResult(models.Model):
         blank=True
     )
 
-    followup_notes = models.TextField(
+    followup_info = models.TextField(
         verbose_name='复诊备注', 
         null=True, 
         blank=True

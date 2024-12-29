@@ -1,6 +1,7 @@
 from django.contrib import admin
-from django.utils import timezone  # Add this import
-from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff
+from django.utils import timezone
+from django.contrib.auth.admin import UserAdmin
+from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser
 
 class VitalSignsInline(admin.StackedInline):
     model = VitalSigns
@@ -29,90 +30,131 @@ class TriageResultInline(admin.StackedInline):
     fieldsets = [
         ('分诊结果', {
             'fields': [
-                ('priority_level', 'area'),
-                'status',
+                ('priority_level', 'triage_area'),
+                'triage_status',
                 'treatment_area',
                 'department',
                 'preliminary_diagnosis'
             ]
         }),
-        ('转诊与复诊', {
+        ('转诊信息', {
             'fields': [
+                'patient_nextstep',
                 'transfer_status',
+                'transfer_hospital',
+                'transfer_reason',
+                'triage_group'
+            ]
+        }),
+        ('复诊安排', {
+            'fields': [
                 'followup_type',
-                'followup_notes'
+                'followup_info'
             ]
         })
     ]
 
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('name_chinese', 'gender', 'date_of_birth', 'phone')
-    search_fields = ['name_chinese', 'id_number', 'phone']
+    list_display = ('name_patient', 'pinyin_name', 'gender', 'age', 'patient_phone', 'hospital')
+    search_fields = ['name_patient', 'pinyin_name', 'id_number', 'patient_phone']
+    list_filter = ['gender', 'hospital']
+    
     fieldsets = [
         ('基本信息', {
             'fields': [
-                'name_chinese',
-                ('gender', 'date_of_birth'),
-                ('id_type', 'id_number'), 
-                'blood_type'
+                ('name_patient', 'pinyin_name'),
+                ('gender', 'date_of_birth', 'age'),
+                ('nationality', 'ethinicity'),
+                'profession'
+            ]
+        }),
+        ('证件信息', {
+            'fields': [
+                ('id_type', 'id_number'),
+                ('id_medical_insurance', 'id_social_insurance', 'id_hospital_card'),
+                'insurance_type',
+                'patient_type'
             ]
         }),
         ('联系方式', {
             'fields': [
-                'phone',
-                'address',
-                ('emergency_contact', 'emergency_phone')
+                'patient_phone',
+                'patient_address',
+                ('emergency_contact', 'emergency_phone', 'emergency_relation')
             ]
         }),
         ('医疗信息', {
-            'fields': ['allergies']
+            'fields': [
+                'blood_type',
+                'allergies'
+            ]
+        }),
+        ('系统信息', {
+            'fields': [
+                'hospital',
+                'id_his'
+            ]
         })
     ]
 
 class MedicalStaffAdmin(admin.ModelAdmin):
-    list_display = ('name', 'staff_id', 'role', 'department')
-    list_filter = ['role', 'department']
+    list_display = ('name', 'staff_id', 'role', 'department', 'hospital')
+    list_filter = ['role', 'hospital']
     search_fields = ['name', 'staff_id']
-
-class TriageRecordAdmin(admin.ModelAdmin):
-    # Remove registration_time from list_display temporarily
-    list_display = ('patient', 'get_priority_level', 'get_area', 'get_status', 'get_department')
-
-    # Add date hierarchy for better date navigation
-    # date_hierarchy = 'registration_time'
     
-     # Enhanced filters
-    list_filter = [
-        ('registration_time', admin.DateFieldListFilter),  # Uncomment this
-        'result__priority_level',
-        'result__area',
-        'result__status',
-        'result__department',
-        'result__treatment_area',
-        'nurse__department'
+    fieldsets = [
+        ('基本信息', {
+            'fields': [
+                'name',
+                'staff_id',
+                'role',
+                'department',
+                'hospital'
+            ]
+        })
     ]
 
-    # Enhanced search
-    search_fields = ['patient__name_chinese', 'patient__id_number']  # Enable searching by patient name and ID
-
-    raw_id_fields = ['patient', 'nurse']  # Adds a lookup widget for selecting patients
-    
+class TriageRecordAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'registration_time', 'get_priority_level', 'get_triage_area', 'nurse', 'hospital')
+    list_filter = [
+        ('registration_time', admin.DateFieldListFilter),
+        'result__priority_level',
+        'result__triage_area',
+        'hospital'
+    ]
+    search_fields = ['patient__name_patient', 'patient__id_number', 'chief_complaint']
+    raw_id_fields = ['patient', 'nurse']
     inlines = [VitalSignsInline, TriageResultInline]
     
     fieldsets = [
-        ('患者信息', {
-            'fields': ['patient']
-        }),
-        ('分诊信息', {
+        ('基本信息', {
             'fields': [
-                'registration_time',  # Add this back
-                'arrival_time',
-                'arrival_method',
+                'patient',
+                'hospital',
                 'nurse'
             ]
         }),
+        ('就诊信息', {
+            'fields': [
+                'registration_time',
+                'illness_time',
+                'arrival_method',
+            ]
+        }),
+        ('分类信息', {
+            'fields': [
+                'speed_channel',
+                'specialty_type',
+                'other_inquiry',
+                'surgery_type',
+                'ifmass_injury'
+            ]
+        }),
         ('病情描述', {
-            'fields': ['chief_complaint', 'medical_history']
+            'fields': [
+                'chief_complaint',
+                'medical_history'
+            ]
         })
     ]
 
@@ -120,61 +162,84 @@ class TriageRecordAdmin(admin.ModelAdmin):
         return obj.result.priority_level if obj.result else None
     get_priority_level.short_description = '分诊等级'
 
-    def get_area(self, obj):
-        return obj.result.area if obj.result else None
-    get_area.short_description = '分区'
-
-    def get_status(self, obj):
-        return obj.result.status if obj.result else None
-    get_status.short_description = '状态'
-
-    def get_department(self, obj):
-        return obj.result.department if obj.result else None
-    get_department.short_description = '科室'
-
-    # def get_registration_time(self, obj):
-        #if obj.registration_time:
-            #return timezone.localtime(obj.registration_time).strftime("%Y-%m-%d %H:%M:%S")
-        #return None
-    #get_registration_time.short_description = '登记时间'
+    def get_triage_area(self, obj):
+        return obj.result.triage_area if obj.result else None
+    get_triage_area.short_description = '分区'
 
 class TriageResultAdmin(admin.ModelAdmin):
-    list_display = ['triage_record', 'priority_level', 'area', 'status', 'department']
-    list_filter = [
-        'priority_level',
-        'area',
-        'status',
-        'department',
-        'treatment_area'
-    ]
+    list_display = ['triage_record', 'priority_level', 'triage_area', 'triage_status', 'department']
+    list_filter = ['priority_level', 'triage_area', 'triage_status']
     search_fields = [
         'preliminary_diagnosis',
-        'triage_record__patient__name_chinese',
+        'triage_record__patient__name_patient',
         'department'
     ]
     
     fieldsets = [
         ('分诊结果', {
             'fields': [
-                'triage_record',  # Add this field
-                ('priority_level', 'area'),
-                'status',
+                'triage_record',
+                ('priority_level', 'triage_area'),
+                'triage_status',
                 'treatment_area',
                 'department',
                 'preliminary_diagnosis'
             ]
         }),
-        ('转诊与复诊', {
+        ('转诊信息', {
             'fields': [
+                'patient_nextstep',
                 'transfer_status',
+                'transfer_hospital',
+                'transfer_reason',
+                'triage_group'
+            ]
+        }),
+        ('复诊安排', {
+            'fields': [
                 'followup_type',
-                'followup_notes'
+                'followup_info'
             ]
         })
     ]
+
+class HospitalAdmin(admin.ModelAdmin):
+    list_display = ('name', 'contact_number', 'is_active')
+    search_fields = ['name', 'address']
+    list_filter = ['is_active']
+    fieldsets = [
+        ('基本信息', {
+            'fields': [
+                'name',
+                'address',
+                'contact_number',
+                'is_active'
+            ]
+        })
+    ]
+
+class HospitalUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 'hospital', 'is_active')
+    list_filter = ('is_active', 'hospital')
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Hospital info', {'fields': ('hospital',)}),
+        ('Permissions', {'fields': ('is_active',)}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'password1', 'password2', 'hospital', 'email', 'first_name', 'last_name'),
+        }),
+    )
+    search_fields = ('username', 'first_name', 'last_name', 'email')
+    ordering = ('username',)
 
 # Register all models
 admin.site.register(Patient, PatientAdmin)
 admin.site.register(TriageRecord, TriageRecordAdmin)
 admin.site.register(MedicalStaff, MedicalStaffAdmin)
-admin.site.register(TriageResult, TriageResultAdmin)  # Add TriageResultAdmin here
+admin.site.register(TriageResult, TriageResultAdmin)
+admin.site.register(Hospital, HospitalAdmin)
+admin.site.register(HospitalUser, HospitalUserAdmin)

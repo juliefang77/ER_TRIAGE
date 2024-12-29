@@ -39,8 +39,14 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ]
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 INSTALLED_APPS = [
@@ -51,10 +57,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    'triage', # ER SaaS 
+    'triage.apps.TriageConfig',  # Change from 'triage' to use AppConfig
     'patient_portal',  # patient app
     'rest_framework', 
     'corsheaders',
+    'rest_framework.authtoken',  # Add this line
+    'followup', # followup app
 ]
 
 MIDDLEWARE = [
@@ -154,3 +162,5 @@ CORS_ALLOW_ALL_ORIGINS = True  # For development only
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:5173",
 # ]
+
+AUTH_USER_MODEL = 'triage.HospitalUser'

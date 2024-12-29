@@ -9,6 +9,53 @@ class VitalSigns(models.Model):
         null=True,  # Added null=True
         blank=True  # Added blank=True
     )
+
+    CONSCIOUS_STATUS_CHOICES = [
+        ('CLEAR', '清醒'),
+        ('DROWSY', '嗜睡'),
+        ('LETHARGY', '昏睡'),
+        ('SEMI_COMA', '半昏迷'),
+        ('COMA', '昏迷')
+    ]
+
+    INJURY_POSITIONS = [
+        ('LIMBS_SKIN', '四肢/皮肤'),
+        ('BACK', '背部'),
+        ('CHEST', '胸部'),
+        ('ABDOMEN', '腹部'),
+        ('HEAD_NECK', '头颈部')
+    ]
+
+    INJURY_TYPES = [
+        ('LACERATION', '裂伤/挫伤'),
+        ('STAB', '刺伤'),
+        ('BLUNT', '钝性伤'),
+        ('GUNSHOT', '弹道伤')
+    ]
+
+    EYE_RESPONSES = [
+        ('NORMAL', '正常睁眼'),
+        ('CALL', '呼唤睁眼'),
+        ('PAIN', '刺痛睁眼'),
+        ('NONE', '无反应')
+    ]
+
+    VERBAL_RESPONSES = [
+        ('CORRECT', '回答正确'),
+        ('INCORRECT', '回答错误'),
+        ('INCOHERENT', '语无伦次'),
+        ('SOUNDS_ONLY', '只能发声'),
+        ('NONE', '不能发声')
+    ]
+
+    MOTOR_RESPONSES = [
+        ('OBEY', '遵嘱运动'),
+        ('LOCALIZE_PAIN', '刺痛定位'),
+        ('WITHDRAW_PAIN', '躲避刺痛'),
+        ('FLEXION_PAIN', '刺痛肢屈'),
+        ('EXTENSION_PAIN', '刺痛肢伸'),
+        ('NONE', '无反应')
+    ]
     
     temperature = models.DecimalField(
         max_digits=3, 
@@ -44,11 +91,26 @@ class VitalSigns(models.Model):
     
     avpu_status = models.CharField(
         max_length=1,
-        choices=[('A', 'Alert'), ('V', 'Voice'), ('P', 'Pain'), ('U', 'Unresponsive')],
+        choices=[
+            ('A', '清醒'),
+            ('V', '对声音有反应'),
+            ('P', '对疼痛有反应'),
+            ('U', '无反应')
+        ],
         default='A',
         verbose_name='AVPU评分',
-        null=True,  # Added null=True
-        blank=True  # Added blank=True
+        null=True,
+        blank=True
+    )
+
+    # blood_potassium 血钾 number 
+    blood_potassium = models.DecimalField(
+        max_digits=4,  # Allows values like 3.5, 5.2, etc.
+        decimal_places=1,
+        verbose_name='血钾',
+        null=True,
+        blank=True,
+        help_text='mmol/L'  # Standard unit for blood potassium
     )
     
     oxygen_saturation = models.IntegerField(
@@ -65,9 +127,18 @@ class VitalSigns(models.Model):
         blank=True
     )
 
+    # conscious_status 意识
+    conscious_status = models.CharField(
+        max_length=20,
+        choices=CONSCIOUS_STATUS_CHOICES,
+        verbose_name='意识',
+        null=True,
+        blank=True
+    )
+
     pain_score = models.IntegerField(
         verbose_name='疼痛评分',
-        choices=[(i, str(i)) for i in range(11)],  # 0-10 scale
+        choices=[(i, str(i)) for i in range(7)],  # 0-7 scale
         null=True,
         blank=True
     )
@@ -78,6 +149,60 @@ class VitalSigns(models.Model):
         null=True,
         blank=True
     )
+
+    # newly added
+    injury_position = models.CharField(
+        max_length=20,
+        choices=INJURY_POSITIONS,
+        verbose_name='损伤部位',
+        null=True,
+        blank=True
+    )
+
+    injury_type = models.CharField(
+        max_length=20,
+        choices=INJURY_TYPES,
+        verbose_name='损伤类型',
+        null=True,
+        blank=True
+    )
+
+    eyeopen_status = models.CharField(
+        max_length=20,
+        choices=EYE_RESPONSES,
+        verbose_name='睁眼反应',
+        null=True,
+        blank=True
+    )
+
+    response_status = models.CharField(
+        max_length=20,
+        choices=VERBAL_RESPONSES,
+        verbose_name='语言反应',
+        null=True,
+        blank=True
+    )
+
+    move_status = models.CharField(
+        max_length=20,
+        choices=MOTOR_RESPONSES,
+        verbose_name='运动反应',
+        null=True,
+        blank=True
+    )
+
+    gcs_score = models.IntegerField(
+        verbose_name='GCS评分',
+        null=True,
+        blank=True
+    )
+
+    rems_score = models.IntegerField(
+        verbose_name='REMS评分',
+        null=True,
+        blank=True
+    )
+
 
     measurement_time = models.DateTimeField(
         auto_now_add=True, 
@@ -97,3 +222,22 @@ class VitalSigns(models.Model):
         if self.triage_record and self.triage_record.patient:
             return f"{self.triage_record.patient} 生命体征"
         return "生命体征记录"
+    
+# TriageResult Table Relations:
+# - Links to TriageRecord (OneToOne)
+
+# Fields:
+# 1. triage_record | 分诊记录 | OneToOneField (TriageRecord)
+# 2. triage_status | 状态 | CharField (choices)
+# 3. priority_level | 分诊等级 | IntegerField (choices)
+# 4. triage_area | 分区 | CharField (choices)
+# 5. treatment_area | 就诊区域 | CharField (choices)
+# 6. department | 分诊科室 | CharField
+# 7. patient_nextstep | 患者去向 | TextField
+# 8. transfer_status | 转诊安排 | CharField (choices)
+# 9. transfer_hospital | 转诊医院 | CharField
+# 10. transfer_reason | 转诊原因 | TextField
+# 11. triage_group | 组别 | CharField (choices)
+# 12. preliminary_diagnosis | 初步诊断 | TextField
+# 13. followup_type | 复诊安排 | CharField (choices)
+# 14. followup_info | 复诊备注 | TextField

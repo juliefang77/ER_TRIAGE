@@ -1,14 +1,24 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, serializers
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff
+from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser
 from .serializers import (
     PatientSerializer,
     TriageRecordSerializer,
     TriageResultSerializer,
+    TriageHistorySerializer,
     VitalSignsSerializer,
     MedicalStaffSerializer,
+    HospitalUserSerializer,
+    HospitalLoginSerializer
 )
 from .filters import TriageRecordFilter
+# Authentication
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+# Pagination and history
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import filters
 
 class SaaSPatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
@@ -27,7 +37,7 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
             'patient',
             'nurse',
             'result',
-            'vital_signs'
+            'vitalsigns'
         ).all()
 
     # Keep your existing perform_create method
@@ -63,6 +73,31 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
                 **triage_result_data
             )
 
+# Custom pagination class
+class TriageHistoryPagination(PageNumberPagination):
+    page_size = 20  # Number of records per page
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+# Triage history view, ranking from most recent
+class TriageHistoryViewSet(viewsets.ModelViewSet):
+    serializer_class = TriageHistorySerializer  # Use the history-specific serializer
+    pagination_class = TriageHistoryPagination
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter
+    ]
+    filterset_class = TriageRecordFilter
+    ordering = ['-registration_time']  # Default ordering by most recent first
+    
+    def get_queryset(self):
+        return TriageRecord.objects.select_related(
+            'patient',
+            'nurse',
+            'result',
+            'vitalsigns'
+        ).all()
+
 class SaaSVitalSignsViewSet(viewsets.ModelViewSet):
     queryset = VitalSigns.objects.all()
     serializer_class = VitalSignsSerializer
@@ -77,4 +112,21 @@ class SaaSMedicalStaffViewSet(viewsets.ModelViewSet):
     queryset = MedicalStaff.objects.all()
     serializer_class = MedicalStaffSerializer
 
+#Authentication for hospitals
+
+class CustomAuthToken(ObtainAuthToken):
+    serializer_class = HospitalLoginSerializer  # Specify the serializer class
     
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                         context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'username': user.username,
+            'hospital': user.hospital.id if user.hospital else None
+        })
+
