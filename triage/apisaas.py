@@ -19,6 +19,8 @@ from rest_framework.response import Response
 # Pagination and history
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
+# Change patient form status to APPROVED upon approval
+from patient_portal.models import PatientTriageSubmission
 
 class SaaSPatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
@@ -46,6 +48,7 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
         patient_data = self.request.data.get('patient_data')
         vital_signs_data = self.request.data.get('vital_signs_data')
         triage_result_data = self.request.data.get('triage_result_data')
+        submission_id = self.request.data.get('submission_id')  # Add this line
         
         # Try to find existing patient or create new one
         patient, created = Patient.objects.get_or_create(
@@ -72,6 +75,13 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
                 triage_record=triage_record,
                 **triage_result_data
             )
+        
+        # Add just this part to update submission status
+        if submission_id:
+            PatientTriageSubmission.objects.filter(
+                id=submission_id,
+                hospital=self.request.user.hospital
+            ).update(status='APPROVED')
 
 # Custom pagination class
 class TriageHistoryPagination(PageNumberPagination):

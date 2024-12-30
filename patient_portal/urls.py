@@ -1,13 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from patient_portal import apipatient  # Import the module like in triage/urls.py
+from .apipatient import PendingSubmissionViewSet, PendingSubmissionDataViewSet
 
 router = DefaultRouter()
-router.register(
-    'register', 
-    apipatient.PatientSelfRegistrationViewSet,  # Use the correct ViewSet name
-    basename='patient-registration'
-)
+
+# list all pending submitted forms
+router.register(r'pendingsubmissions', PendingSubmissionViewSet, basename='pending-submissions')
+
+# get submission data for auto fill
+router.register(r'autofilltriage', PendingSubmissionDataViewSet, basename='autofill-triage')  # Changed to ViewSet
 
 urlpatterns = [
     path('', include(router.urls)),

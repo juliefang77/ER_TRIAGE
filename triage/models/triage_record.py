@@ -34,9 +34,18 @@ class TriageRecord(models.Model):
         ('OTHER', '其他')
     ]
 
+    CHIEF_SYMPTOM_CHOICES = [
+        ('BLEEDING', '加压止血无法控制/急性出血'),
+        ('CHEST_PAIN', '胸痛胸闷，呼吸困难'),
+        ('PREGNANCY_PAIN', '孕妇剧烈腹痛'),
+        ('HIGH_FEVER', '持续高烧>38.5摄氏度'),
+        ('CONSCIOUSNESS', '突发意识改变（嗜睡，定向障碍，昏厥）'),
+        ('HEAD_INJURY', '头/眼受伤')
+    ]
+
     SPECIALTY_TYPE_CHOICES = [
         ('CHEST_PAIN', '胸痛'),
-        ('POST_STROKE', '卒中过'),
+        ('POST_STROKE', '卒中'),
         ('TRAUMA', '创伤'),
         ('HIGH_RISK_PREGNANCY', '高危孕产妇'),
         ('PEDIATRIC_EMERGENCY', '危急儿童和新生儿')
@@ -114,6 +123,14 @@ class TriageRecord(models.Model):
         null=True, 
         blank=True
     )
+
+    chief_symptom = models.CharField(
+        max_length=30,
+        choices=CHIEF_SYMPTOM_CHOICES,
+        verbose_name='快捷分诊',
+        null=True,
+        blank=True
+    )
     
     medical_history = models.TextField(
         verbose_name='既往史', 
@@ -161,6 +178,8 @@ class TriageRecord(models.Model):
         blank=True
     )
 
+
+
     def __str__(self):
         patient_str = self.patient if self.patient else "未知患者"
         return f"{patient_str} - {self.registration_time}"
@@ -175,7 +194,7 @@ class TriageRecord(models.Model):
 # 1. patient | 患者 | ForeignKey (Patient)
 # 2. hospital | 所属医院 | ForeignKey (HospitalUser)
 # 3. registration_time | 登记时间 | DateTimeField
-# 4. nurse | 分诊护士 | ForeignKey (MedicalStaff)
+# 4. nurse | 分诊护士 | ForeignKey (MedicalStaff) - Change to nurse only
 # 5. illness_time | 发病时间 | DateTimeField
 # 6. arrival_method | 来院方式 | CharField (choices)
 # 7. chief_complaint | 主诉 | TextField
@@ -185,3 +204,4 @@ class TriageRecord(models.Model):
 # 11. other_inquiry | 非急诊类 | CharField (choices)
 # 12. surgery_type | 手术 | CharField (choices)
 # 13. ifmass_injury | 是否群伤 | CharField (choices)
+# 14 chief_symptom | 快捷分诊 ｜ CharField (choices)

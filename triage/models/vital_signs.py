@@ -223,21 +223,3 @@ class VitalSigns(models.Model):
             return f"{self.triage_record.patient} 生命体征"
         return "生命体征记录"
     
-# TriageResult Table Relations:
-# - Links to TriageRecord (OneToOne)
-
-# Fields:
-# 1. triage_record | 分诊记录 | OneToOneField (TriageRecord)
-# 2. triage_status | 状态 | CharField (choices)
-# 3. priority_level | 分诊等级 | IntegerField (choices)
-# 4. triage_area | 分区 | CharField (choices)
-# 5. treatment_area | 就诊区域 | CharField (choices)
-# 6. department | 分诊科室 | CharField
-# 7. patient_nextstep | 患者去向 | TextField
-# 8. transfer_status | 转诊安排 | CharField (choices)
-# 9. transfer_hospital | 转诊医院 | CharField
-# 10. transfer_reason | 转诊原因 | TextField
-# 11. triage_group | 组别 | CharField (choices)
-# 12. preliminary_diagnosis | 初步诊断 | TextField
-# 13. followup_type | 复诊安排 | CharField (choices)
-# 14. followup_info | 复诊备注 | TextField

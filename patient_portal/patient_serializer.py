@@ -1,49 +1,47 @@
+# patient_portal/patient_serializer.py
+
 from rest_framework import serializers
-from triage.models import Patient, TriageRecord, VitalSigns
+from .models import PatientTriageSubmission
 
-class VitalSignsSerializer(serializers.ModelSerializer):
+class PatientTriageSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = VitalSigns
-        fields = ['temperature', 'pain_score']
+        model = PatientTriageSubmission
+        fields = '__all__'
 
-class TriageRecordSerializer(serializers.ModelSerializer):
-    vital_signs = VitalSignsSerializer()
-    
+class PendingSubmissionMappingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TriageRecord
-        fields = ['chief_complaint', 'vital_signs']
+        model = PatientTriageSubmission
+        fields = '__all__'
 
-class PatientSelfRegistrationSerializer(serializers.ModelSerializer):
-    triage_info = TriageRecordSerializer(write_only=True)  # For POST requests
-    triage_records = TriageRecordSerializer(many=True, read_only=True)  # For GET requests
-
-    class Meta:
-        model = Patient
-        fields = [
-            'name_chinese',
-            'id_type',
-            'id_number',
-            'triage_info',  # For creating
-            'triage_records'  # For viewing
-        ]
-
-    def create(self, validated_data):
-        triage_info = validated_data.pop('triage_info')
-        vital_signs_data = triage_info.pop('vital_signs')
-
-        # Create patient
-        patient = Patient.objects.create(**validated_data)
-
-        # Create triage record
-        triage_record = TriageRecord.objects.create(
-            patient=patient,
-            **triage_info
-        )
-
-        # Create vital signs
-        VitalSigns.objects.create(
-            triage_record=triage_record,
-            **vital_signs_data
-        )
-
-        return patient
+    def to_representation(self, instance):
+        """Map submission data to match main form structure"""
+        data = super().to_representation(instance)
+        
+        mapped_data = {
+            'patient_data': {
+                'name_patient': data['name_patient'],
+                'id_type': data['id_type'],
+                'id_number': data['id_number'],
+                'gender': data['gender'],
+                'date_of_birth': data['date_of_birth'],
+                'patient_phone': data['patient_phone'],
+                'id_medical_insurance': data['id_medical_insurance'],
+                'id_hospital_card': data['id_hospital_card'],
+                'insurance_type': data['insurance_type'],
+                'patient_type': data['patient_type'],
+            },
+            'vital_signs_data': {
+                'temperature': data['temperature'],
+                'pain_score': data['pain_score'],
+                'injury_position': data['injury_position'],
+                'injury_type': data['injury_type'],
+            },
+            'triage_data': {
+                'chief_complaint': data['chief_complaint'],
+                'chief_symptom': data['chief_symptom'],
+                'other_inquiry': data['other_inquiry'],
+                'hospital': data['hospital'],
+            }
+        }
+        
+        return mapped_data

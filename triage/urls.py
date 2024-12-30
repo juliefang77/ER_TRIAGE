@@ -8,11 +8,14 @@ router = DefaultRouter()
 
 # SaaS endpoints with apisaas prefix
 router.register(r'patients', apisaas.SaaSPatientViewSet, basename='saas-patient')
-router.register(r'triage', apisaas.SaaSTriageViewSet, basename='saas-triage') # use this only
+
+# Used for most 分诊 tasks involving form filling (nurse filling, nurse submits patient pre-fill)
+router.register(r'triage', apisaas.SaaSTriageViewSet, basename='saas-triage') 
+
 router.register(r'vitals', apisaas.SaaSVitalSignsViewSet, basename='saas-vitals')
 router.register(r'staff', apisaas.SaaSMedicalStaffViewSet, basename='saas-staff')
 
-# SaaS: No longer used
+# Used for 分诊记录
 router.register(r'triagehistory', apisaas.TriageHistoryViewSet, basename='triage-history')
 
 urlpatterns = [

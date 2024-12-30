@@ -153,6 +153,7 @@ class TriageRecordAdmin(admin.ModelAdmin):
         ('病情描述', {
             'fields': [
                 'chief_complaint',
+                'chief_symptom',
                 'medical_history'
             ]
         })
