@@ -260,7 +260,7 @@ class Patient(models.Model):
     )
 
     def __str__(self):
-        name = self.name_chinese or "未知"
+        name = self.name_patient or "未知"
         id_num = self.id_number or "无证件号"
         return f"{name} ({id_num})"
 

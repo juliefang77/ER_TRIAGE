@@ -12,8 +12,7 @@ class VitalSignsInline(admin.StackedInline):
                 ('temperature', 'heart_rate', 'respiratory_rate'),
                 ('systolic_bp', 'diastolic_bp'),
                 'oxygen_saturation',
-                'blood_potassium',
-                'measurement_time'
+                'blood_potassium'
             ]
         }),
         ('评分', {
@@ -40,6 +39,7 @@ class VitalSignsInline(admin.StackedInline):
             'fields': ['blood_glucose']
         })
     ]
+    readonly_fields = ['measurement_time']  # Add this if you want to show it as read-only
 
 class TriageResultInline(admin.StackedInline):
     model = TriageResult
