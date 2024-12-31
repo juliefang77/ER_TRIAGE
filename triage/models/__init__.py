@@ -5,6 +5,7 @@ from .triage_result import TriageResult
 from .vital_signs import VitalSigns
 from .hospital import Hospital
 from .user import HospitalUser
+from .triage_historyinfo import TriageHistoryInfo
 
 __all__ = [
     'Patient',
@@ -14,5 +15,6 @@ __all__ = [
     'TriageResult',
     'Hospital',
     'HospitalUser',
+    'TriageHistoryInfo'
 ]
 

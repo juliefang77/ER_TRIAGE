@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.contrib.auth.admin import UserAdmin
-from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser
+from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser, TriageHistoryInfo
 
 class VitalSignsInline(admin.StackedInline):
     model = VitalSigns
@@ -11,13 +11,29 @@ class VitalSignsInline(admin.StackedInline):
             'fields': [
                 ('temperature', 'heart_rate', 'respiratory_rate'),
                 ('systolic_bp', 'diastolic_bp'),
-                'oxygen_saturation'
+                'oxygen_saturation',
+                'blood_potassium',
+                'measurement_time'
             ]
         }),
         ('评分', {
             'fields': [
                 ('avpu_status', 'pain_score'),
                 ('mews_score', 'trauma_score'),
+                'gcs_score',
+                'rems_score'
+            ]
+        }),
+        ('意识状态', {
+            'fields': [
+                'conscious_status',
+                ('eyeopen_status', 'response_status', 'move_status')
+            ]
+        }),
+        ('创伤信息', {
+            'fields': [
+                'injury_position',
+                'injury_type'
             ]
         }),
         ('其他', {
@@ -236,6 +252,38 @@ class HospitalUserAdmin(UserAdmin):
     )
     search_fields = ('username', 'first_name', 'last_name', 'email')
     ordering = ('username',)
+
+@admin.register(TriageHistoryInfo)
+class TriageHistoryInfoAdmin(admin.ModelAdmin):
+    list_display = ('triage_record', 'assigned_doctor', 'assigned_nurse', 'departure_time')
+    
+    fieldsets = [
+        ('基本信息', {
+            'fields': [
+                'triage_record',
+                'guahao_status',
+                'edit_triage',
+            ]
+        }),
+        ('时间信息', {
+            'fields': [
+                'departure_time',
+                'stay_duration',
+            ]
+        }),
+        ('医护人员', {
+            'fields': [
+                'assigned_doctor',
+                'assigned_nurse',
+            ]
+        })
+    ]
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['assigned_doctor'].queryset = MedicalStaff.objects.filter(role='DOC')
+        form.base_fields['assigned_nurse'].queryset = MedicalStaff.objects.filter(role='NUR')
+        return form
 
 # Register all models
 admin.site.register(Patient, PatientAdmin)

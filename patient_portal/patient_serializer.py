@@ -16,6 +16,16 @@ class PendingSubmissionMappingSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Map submission data to match main form structure"""
         data = super().to_representation(instance)
+
+        # Handle injury_position as multiple choice
+        injury_position = data['injury_position']
+        if injury_position:
+            # If it's stored as comma-separated string, convert to list
+            if isinstance(injury_position, str):
+                injury_position = injury_position.split(',')
+            # If it's already a list, use as is
+            elif not isinstance(injury_position, list):
+                injury_position = [injury_position]
         
         mapped_data = {
             'patient_data': {
@@ -33,7 +43,7 @@ class PendingSubmissionMappingSerializer(serializers.ModelSerializer):
             'vital_signs_data': {
                 'temperature': data['temperature'],
                 'pain_score': data['pain_score'],
-                'injury_position': data['injury_position'],
+                'injury_position': injury_position,  # Now handles multiple values
                 'injury_type': data['injury_type'],
             },
             'triage_data': {

@@ -23,14 +23,16 @@ class VitalSigns(models.Model):
         ('BACK', '背部'),
         ('CHEST', '胸部'),
         ('ABDOMEN', '腹部'),
-        ('HEAD_NECK', '头颈部')
+        ('HEAD_NECK', '头颈部'),
+        ('BUTTOCKS', '臀部')  # Added 臀部
     ]
 
     INJURY_TYPES = [
         ('LACERATION', '裂伤/挫伤'),
         ('STAB', '刺伤'),
         ('BLUNT', '钝性伤'),
-        ('GUNSHOT', '弹道伤')
+        ('GUNSHOT', '弹道伤'),
+        ('BURN', '烧伤')  # Added 烧伤
     ]
 
     EYE_RESPONSES = [
@@ -152,7 +154,7 @@ class VitalSigns(models.Model):
 
     # newly added
     injury_position = models.CharField(
-        max_length=20,
+        max_length=100,
         choices=INJURY_POSITIONS,
         verbose_name='损伤部位',
         null=True,
@@ -223,3 +225,29 @@ class VitalSigns(models.Model):
             return f"{self.triage_record.patient} 生命体征"
         return "生命体征记录"
     
+# VitalSigns Table Relations:
+# - Links to TriageRecord (OneToOne through reverse relation)
+
+# Fields:
+# 1. triage_record | 分诊记录 | OneToOneField (TriageRecord)
+# 2. temperature | 体温 | DecimalField(3,1)
+# 3. systolic_bp | 收缩压 | IntegerField
+# 4. diastolic_bp | 舒张压 | IntegerField
+# 5. heart_rate | 心率 | IntegerField
+# 6. respiratory_rate | 呼吸频率 | IntegerField
+# 7. avpu_status | AVPU评分 | CharField (choices)
+# 8. blood_potassium | 血钾 | DecimalField(4,1)
+# 9. oxygen_saturation | 血氧饱和度 | IntegerField
+# 10. blood_glucose | 血糖 | DecimalField(5,1)
+# 11. conscious_status | 意识 | CharField (choices)
+# 12. pain_score | 疼痛评分 | IntegerField (0-6)
+# 13. trauma_score | 创伤评分 | IntegerField (0-12)
+# 14. injury_position | 损伤部位 | CharField (multiple choices)
+# 15. injury_type | 损伤类型 | CharField (choices)
+# 16. eyeopen_status | 睁眼反应 | CharField (choices)
+# 17. response_status | 语言反应 | CharField (choices)
+# 18. move_status | 运动反应 | CharField (choices)
+# 19. gcs_score | GCS评分 | IntegerField
+# 20. rems_score | REMS评分 | IntegerField
+# 21. measurement_time | 测量时间 | DateTimeField
+# 22. mews_score | MEWS评分 | IntegerField

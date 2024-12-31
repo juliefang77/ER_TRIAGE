@@ -11,7 +11,8 @@ class PatientTriageSubmissionAdmin(admin.ModelAdmin):
         'status',
         'chief_complaint',
         'date_of_birth',
-        'patient_phone'
+        'patient_phone',
+        'get_injury_positions'  # Add display method for multiple positions
     ]
     
     list_filter = ['status', 'hospital']
@@ -31,11 +32,23 @@ class PatientTriageSubmissionAdmin(admin.ModelAdmin):
             'fields': (
                 'chief_complaint', 'chief_symptom',
                 'pain_score', 'temperature',
-                'injury_position', 'injury_type',
+                ('injury_position', 'injury_type'),  # Group these together
                 'other_inquiry'
-            )
+            ),
+            'classes': ('wide',)  # Make wider for multiple choice display
         }),
         ('Status', {
             'fields': ('hospital', 'status')
         })
     )
+
+    def get_injury_positions(self, obj):
+        """Format multiple injury positions for display in list view"""
+        if obj.injury_position:
+            if isinstance(obj.injury_position, str):
+                positions = obj.injury_position.split(',')
+            else:
+                positions = obj.injury_position
+            return ', '.join(pos for pos in positions)
+        return '-'
+    get_injury_positions.short_description = '损伤部位'  # Column header in list view

@@ -2,25 +2,47 @@ from django_filters import rest_framework as filters
 from .models import TriageRecord
 
 class TriageRecordFilter(filters.FilterSet):
-    # Filter by date range
+    # Existing date range filters
     start_date = filters.DateTimeFilter(field_name='registration_time', lookup_expr='gte')
     end_date = filters.DateTimeFilter(field_name='registration_time', lookup_expr='lte')
-    
-    # Filter by triage result fields
+
+    # TriageResult filters
     priority_level = filters.NumberFilter(field_name='result__priority_level')
-    area = filters.CharFilter(field_name='result__area')
-    
-    # Filter by patient info
-    patient_id = filters.CharFilter(field_name='patient__id_number')
-    patient_name = filters.CharFilter(field_name='patient__name_chinese')
+    triage_status = filters.CharFilter(field_name='result__status')
+    treatment_area = filters.CharFilter(field_name='result__area')
+    department = filters.CharFilter(field_name='result__department')
+    patient_nextstep = filters.CharFilter(field_name='result__next_step')
+    triage_group = filters.NumberFilter(field_name='result__group')
+
+    # TriageRecord filters
+    speed_channel = filters.CharFilter(field_name='speed_channel')
+    specialty_type = filters.CharFilter(field_name='specialty_type')
+    arrival_method = filters.CharFilter(field_name='arrival_method')
+    ifmass_injury = filters.CharFilter(field_name='ifmass_injury')
+
+    # Patient filters
+    date_of_birth = filters.DateFilter(field_name='patient__date_of_birth')
+    name_patient = filters.CharFilter(field_name='patient__name_patient', lookup_expr='icontains')
+
+    # TriageHistoryInfo filters
+    guahao_status = filters.CharFilter(field_name='history_info__guahao_status')
 
     class Meta:
         model = TriageRecord
         fields = [
-            'start_date', 
-            'end_date', 
+            'start_date',
+            'end_date',
             'priority_level',
-            'area',
-            'patient_id',
-            'patient_name'
+            'triage_status',
+            'treatment_area',
+            'department',
+            'patient_nextstep',
+            'triage_group',
+            'speed_channel',
+            'specialty_type',
+            'arrival_method',
+            'ifmass_injury',
+            'date_of_birth',
+            'name_patient',
+            'guahao_status'
         ]

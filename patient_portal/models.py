@@ -92,17 +92,19 @@ class PatientTriageSubmission(models.Model):
 
     INJURY_POSITION_CHOICES = [
         ('LIMB_SKIN', '四肢/皮肤'),
-        ('BACK', '北部'),
+        ('BACK', '背部'),
         ('CHEST', '胸部'),
         ('ABDOMEN', '腹部'),
-        ('HEAD_NECK', '头颈部')
+        ('HEAD_NECK', '头颈部'),
+        ('BUTTOCKS', '臀部')  # Added 臀部
     ]
 
     INJURY_TYPE_CHOICES = [
         ('LACERATION', '裂伤/挫伤'),
         ('STAB', '刺伤'),
         ('BLUNT', '钝性伤'),
-        ('GUNSHOT', '弹道伤')
+        ('GUNSHOT', '弹道伤'),
+        ('BURN', '烧伤')  # Added 烧伤
     ]
 
     status = models.CharField(
@@ -217,7 +219,7 @@ class PatientTriageSubmission(models.Model):
     )
 
     injury_position = models.CharField(
-        max_length=50,
+        max_length=100,
         verbose_name='小人图/损伤部位',
         choices=INJURY_POSITION_CHOICES,
         null=True,
@@ -280,3 +282,4 @@ class PatientTriageSubmission(models.Model):
 # 17. other_inquiry | 非急诊类 | CharField (choices)
 # 18. patient_type | 身份标识 | CharField (choices)
 # 19. uuid | Primary key
+# 20. status | 状态 ｜ 待处理、已通过

@@ -39,7 +39,8 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
             'patient',
             'nurse',
             'result',
-            'vitalsigns'
+            'vitalsigns',
+            'history_info'
         ).all()
 
     # Keep your existing perform_create method
@@ -105,7 +106,8 @@ class TriageHistoryViewSet(viewsets.ModelViewSet):
             'patient',
             'nurse',
             'result',
-            'vitalsigns'
+            'vitalsigns',
+            'history_info'
         ).all()
 
 class SaaSVitalSignsViewSet(viewsets.ModelViewSet):
