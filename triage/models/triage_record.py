@@ -4,6 +4,7 @@ from .medical_staff import MedicalStaff
 from django.utils import timezone 
 
 class TriageRecord(models.Model):
+
     ARRIVAL_METHODS = [
         ('WALK', '步行'),
         ('CARRIED', '抱送'),

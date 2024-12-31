@@ -154,7 +154,7 @@ class VitalSigns(models.Model):
 
     # newly added
     injury_position = models.CharField(
-        max_length=100,
+        max_length=255,
         choices=INJURY_POSITIONS,
         verbose_name='损伤部位',
         null=True,

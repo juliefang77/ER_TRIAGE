@@ -59,6 +59,18 @@ class Patient(models.Model):
         ('ORPHANED', '失独人员')
     ]
 
+    BLOOD_TYPES = [
+        ('A+', 'A+'),
+        ('A-', 'A-'),
+        ('B+', 'B+'),
+        ('B-', 'B-'),
+        ('AB+', 'AB+'),
+        ('AB-', 'AB-'),
+        ('O+', 'O+'),
+        ('O-', 'O-'),
+        ('Unknown', '未知'),
+    ]
+
     # Add UUID as primary key
     id_system = models.UUIDField(
         primary_key=True,
@@ -201,18 +213,6 @@ class Patient(models.Model):
         null=True, 
         blank=True
     )
-    
-    BLOOD_TYPES = [
-        ('A+', 'A+'),
-        ('A-', 'A-'),
-        ('B+', 'B+'),
-        ('B-', 'B-'),
-        ('AB+', 'AB+'),
-        ('AB-', 'AB-'),
-        ('O+', 'O+'),
-        ('O-', 'O-'),
-        ('Unknown', '未知'),
-    ]
 
     blood_type = models.CharField(
         max_length=10,
@@ -281,10 +281,10 @@ class Patient(models.Model):
 # 2. id_his | HIS系统ID | CharField
 # 3. name_patient | 姓名 | CharField
 # 4. pinyin_name | 拼音姓名 | CharField
-# 5. gender | 性别 | CharField (choices)
+# 5. gender | 性别 | CharField (choices: "M", "F")
 # 6. date_of_birth | 出生日期 | DateField
 # 7. age | 年龄 | IntegerField
-# 8. id_type | 证件类型 | CharField (choices)
+# 8. id_type | 证件类型 | CharField (choices: "ID", "HUKOU", "HMT", "PERMANENT", "PASSPORT", "MILITARY")
 # 9. id_number | 证件号码 | CharField
 # 10. nationality | 国籍 | CharField
 # 11. ethinicity | 民族 | CharField
@@ -292,12 +292,12 @@ class Patient(models.Model):
 # 13. id_medical_insurance | 医保卡号 | CharField
 # 14. id_social_insurance | 社保卡号 | CharField
 # 15. id_hospital_card | 诊疗卡号 | CharField
-# 16. insurance_type | 费别 | CharField (choices)
+# 16. insurance_type | 费别 | CharField (choices: "SELF", "PUBLIC", "MEDICAL", "COMMERCIAL", "EMPLOYEE", "EMPLOYEE_FAMILY", "OTHER_REGION", "NEW_RURAL", "URBAN_RURAL", "FIVE_SPECIAL", "LOW_INCOME", "MILITARY", "EARTHQUAKE_512", "MINOR_INJURY", "RAILWAY", "ROAD_FUND", "DISABILITY", "DISABLED", "SPONSOR", "HOMELESS", "LEAVE", "WORK_INJURY", "CAR_INJURY", "MATERNITY", "SPECIAL")
 # 17. patient_phone | 电话 | CharField
 # 18. patient_address | 地址 | CharField
-# 19. blood_type | 血型 | CharField (choices)
+# 19. blood_type | 血型 | CharField (choices: "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown")
 # 20. emergency_contact | 紧急联系人 | CharField
 # 21. emergency_phone | 紧急联系人电话 | CharField
 # 22. emergency_relation | 紧急联系人关系 | CharField
-# 23. patient_type | 身份标识 | CharField (choices)
+# 23. patient_type | 身份标识 | CharField (choices: "THREE_NO", "LOW_INCOME", "SPECIAL_POVERTY", "CARD_POVERTY", "FIVE_GUARANTEE", "MILITARY_8023", "ACTIVE_MILITARY", "RETIRED_MILITARY", "ORPHANED")
 # 24. allergies | 过敏史 | TextField

@@ -34,28 +34,25 @@ class TriageResultSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class VitalSignsSerializer(serializers.ModelSerializer):
-    # Add custom field handling for multiple injury positions
-    injury_position = serializers.MultipleChoiceField(
-        choices=VitalSigns.INJURY_POSITIONS,  # Access through the model
-        required=False
+    injury_position = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        allow_empty=True,
+        allow_null=True
     )
 
     class Meta:
         model = VitalSigns
         fields = '__all__'
 
-    def to_representation(self, instance):
-        # Convert comma-separated string to list when reading
-        ret = super().to_representation(instance)
-        if ret['injury_position']:
-            ret['injury_position'] = ret['injury_position'].split(',')
-        return ret
-
-    def to_internal_value(self, data):
-        # Convert list back to comma-separated string when writing
-        if 'injury_position' in data and isinstance(data['injury_position'], list):
-            data['injury_position'] = ','.join(data['injury_position'])
-        return super().to_internal_value(data)
+    def validate_injury_position(self, value):
+        # Add validation for the choices
+        valid_choices = [choice[0] for choice in VitalSigns.INJURY_POSITIONS]
+        if value:
+            for pos in value:
+                if pos not in valid_choices:
+                    raise serializers.ValidationError(f"Invalid choice: {pos}")
+        return value
 
 class TriageHistoryInfoSerializer(serializers.ModelSerializer):
     # All fields editable except stay_duration
@@ -70,7 +67,7 @@ class TriageHistoryInfoSerializer(serializers.ModelSerializer):
 # 新建分诊 API serializer 
 class TriageRecordSerializer(serializers.ModelSerializer):
     patient = PatientSerializer(required=False)
-    vital_signs = VitalSignsSerializer(required=False)
+    vitalsigns = VitalSignsSerializer(required=False)
     result = TriageResultSerializer(required=False)
     nurse = MedicalStaffSerializer(required=False)
 
@@ -81,7 +78,7 @@ class TriageRecordSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Pop nested data
         patient_data = validated_data.pop('patient', None)
-        vital_signs_data = validated_data.pop('vital_signs', None)
+        vital_signs_data = validated_data.pop('vitalsigns', None)
         result_data = validated_data.pop('result', None)
         nurse_data = validated_data.pop('nurse', None)
         submission_id = validated_data.pop('submission_id', None)
@@ -91,10 +88,14 @@ class TriageRecordSerializer(serializers.ModelSerializer):
 
         # Create or update related objects if data exists
         if patient_data:
-            patient, _ = Patient.objects.get_or_create(
-                id_number=patient_data.get('id_number'),
-                defaults=patient_data
-            )
+            id_number = patient_data.get('id_number')
+            if id_number:  # Only try to find existing patient if ID is provided
+                patient, _ = Patient.objects.get_or_create(
+                    id_number=id_number,
+                    defaults=patient_data
+                )
+            else:  # Always create new patient if no ID
+                patient = Patient.objects.create(**patient_data)
             triage_record.patient = patient
 
         if vital_signs_data:
@@ -129,7 +130,7 @@ class TriageHistorySerializer(serializers.ModelSerializer):
     patient = PatientSerializer()
     nurse = MedicalStaffSerializer()
     result = TriageResultSerializer()
-    vital_signs = VitalSignsSerializer()
+    vitalsigns = VitalSignsSerializer()
     history_info = TriageHistoryInfoSerializer()
 
     class Meta:
