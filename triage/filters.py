@@ -7,7 +7,11 @@ class TriageRecordFilter(filters.FilterSet):
     end_date = filters.DateTimeFilter(field_name='registration_time', lookup_expr='lte')
 
     # TriageResult filters
-    priority_level = filters.NumberFilter(field_name='result__priority_level')
+    priority_level = filters.NumberFilter(
+        field_name='result__priority_level',
+        lookup_expr='exact'  # Add this to ensure exact matching
+    )
+
     triage_status = filters.CharFilter(field_name='result__status')
     treatment_area = filters.CharFilter(field_name='result__area')
     department = filters.CharFilter(field_name='result__department')
@@ -46,3 +50,19 @@ class TriageRecordFilter(filters.FilterSet):
             'name_patient',
             'guahao_status'
         ]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        print("Filter data received:", self.data)
+        
+    def filter_queryset(self, queryset):
+        print("Initial queryset count:", queryset.count())
+        if 'name_patient' in self.data:
+            print("Filtering by name:", self.data['name_patient'])
+        if 'priority_level' in self.data:
+            print("Filtering by priority:", self.data['priority_level'])
+        
+        filtered = super().filter_queryset(queryset)
+        print("Final queryset count:", filtered.count())
+        return filtered
+    

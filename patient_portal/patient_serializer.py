@@ -3,18 +3,27 @@
 from rest_framework import serializers
 from .models import PatientTriageSubmission
 
+# Patient filling form 
 class PatientTriageSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientTriageSubmission
         fields = '__all__'
 
+
+# Nurse views all PENDING patients as a list, read only
+class PendingSubmissionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PatientTriageSubmission
+        fields = '__all__'
+
+
+# Nurse opens an individual patient's page, and sees autofilling, can edit
 class PendingSubmissionMappingSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientTriageSubmission
         fields = '__all__'
 
     def to_representation(self, instance):
-        """Map submission data to match main form structure"""
         data = super().to_representation(instance)
 
         # Handle injury_position as multiple choice

@@ -4,8 +4,30 @@ from rest_framework import views
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import PatientTriageSubmission
-from .patient_serializer import PatientTriageSubmissionSerializer
-from .patient_serializer import PendingSubmissionMappingSerializer
+from .patient_serializer import (
+    PatientTriageSubmissionSerializer,
+    PendingSubmissionListSerializer,  # Add this import
+    PendingSubmissionMappingSerializer
+)
+
+# Patient submit the form
+class PatientTriageSubmissionViewSet(viewsets.ModelViewSet):
+    queryset = PatientTriageSubmission.objects.all()
+    serializer_class = PatientTriageSubmissionSerializer
+
+    def perform_create(self, serializer):
+        # Simply save with PENDING status
+        serializer.save(status='PENDING')
+
+# This is the API for listing all PENDING submissions
+class PendingSubmissionViewSet(viewsets.ReadOnlyModelViewSet):  # Changed to ReadOnlyModelViewSet
+    serializer_class = PendingSubmissionListSerializer
+    
+    def get_queryset(self):
+        return PatientTriageSubmission.objects.filter(
+            hospital=self.request.user.hospital,
+            status='PENDING'
+        )
 
 # This API should be called when nurse opens a pre-filled triage form. Data-mapping is included here
 class PendingSubmissionDataViewSet(viewsets.ViewSet):  # Changed to ViewSet
@@ -31,13 +53,7 @@ class PendingSubmissionDataViewSet(viewsets.ViewSet):  # Changed to ViewSet
             status='PENDING'
         )
 
-# This is the API for listing all PENDING submissions
-class PendingSubmissionViewSet(viewsets.ModelViewSet):  # Changed to ModelViewSet
-    serializer_class = PatientTriageSubmissionSerializer
-    
-    def get_queryset(self):
-        return PatientTriageSubmission.objects.filter(
-            hospital=self.request.user.hospital,
-            status='PENDING'
-        )
+
+
+
 

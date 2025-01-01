@@ -90,14 +90,6 @@ class PatientTriageSubmission(models.Model):
         ('NUCLEIC_TEST', '核酸检测')
     ]
 
-    INJURY_POSITION_CHOICES = [
-        ('LIMB_SKIN', '四肢/皮肤'),
-        ('BACK', '背部'),
-        ('CHEST', '胸部'),
-        ('ABDOMEN', '腹部'),
-        ('HEAD_NECK', '头颈部'),
-        ('BUTTOCKS', '臀部')  # Added 臀部
-    ]
 
     INJURY_TYPE_CHOICES = [
         ('LACERATION', '裂伤/挫伤'),
@@ -219,9 +211,8 @@ class PatientTriageSubmission(models.Model):
     )
 
     injury_position = models.CharField(
-        max_length=100,
+        max_length=255,
         verbose_name='小人图/损伤部位',
-        choices=INJURY_POSITION_CHOICES,
         null=True,
         blank=True
     )

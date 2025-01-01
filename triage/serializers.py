@@ -46,7 +46,6 @@ class VitalSignsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_injury_position(self, value):
-        # Add validation for the choices
         valid_choices = [choice[0] for choice in VitalSigns.INJURY_POSITIONS]
         if value:
             for pos in value:
@@ -54,10 +53,11 @@ class VitalSignsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(f"Invalid choice: {pos}")
         return value
 
+# Feed into 分诊记录 API
 class TriageHistoryInfoSerializer(serializers.ModelSerializer):
     # All fields editable except stay_duration
-    assigned_doctor = MedicalStaffSerializer()
-    assigned_nurse = MedicalStaffSerializer()
+    assigned_doctor = MedicalStaffSerializer(required=False, allow_null=True)
+    assigned_nurse = MedicalStaffSerializer(required=False, allow_null=True)
 
     class Meta:
         model = TriageHistoryInfo
@@ -66,10 +66,11 @@ class TriageHistoryInfoSerializer(serializers.ModelSerializer):
 
 # 新建分诊 API serializer 
 class TriageRecordSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer(required=False)
-    vitalsigns = VitalSignsSerializer(required=False)
-    result = TriageResultSerializer(required=False)
-    nurse = MedicalStaffSerializer(required=False)
+    patient = PatientSerializer(required=False, allow_null=True)
+    nurse = MedicalStaffSerializer(required=False, allow_null=True)
+    result = TriageResultSerializer(required=False, allow_null=True)
+    vitalsigns = VitalSignsSerializer(required=False, allow_null=True)
+    history_info = TriageHistoryInfoSerializer(required=False, allow_null=True)
 
     class Meta:
         model = TriageRecord
@@ -124,14 +125,13 @@ class TriageRecordSerializer(serializers.ModelSerializer):
         triage_record.save()
         return triage_record
 
-# For the history view that needs combined data (not used now)
+# 分诊记录API
 class TriageHistorySerializer(serializers.ModelSerializer):
-    # Remove read_only=True from all except calculated fields
-    patient = PatientSerializer()
-    nurse = MedicalStaffSerializer()
-    result = TriageResultSerializer()
-    vitalsigns = VitalSignsSerializer()
-    history_info = TriageHistoryInfoSerializer()
+    patient = PatientSerializer(required=False, allow_null=True)
+    nurse = MedicalStaffSerializer(required=False, allow_null=True)
+    result = TriageResultSerializer(required=False, allow_null=True)
+    vitalsigns = VitalSignsSerializer(required=False, allow_null=True)
+    history_info = TriageHistoryInfoSerializer(required=False, allow_null=True)
 
     class Meta:
         model = TriageRecord
