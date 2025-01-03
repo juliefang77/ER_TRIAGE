@@ -9,11 +9,13 @@ from .patient_serializer import (
     PendingSubmissionListSerializer,  # Add this import
     PendingSubmissionMappingSerializer
 )
+from rest_framework.permissions import AllowAny
 
 # Patient submit the form
 class PatientTriageSubmissionViewSet(viewsets.ModelViewSet):
     queryset = PatientTriageSubmission.objects.all()
     serializer_class = PatientTriageSubmissionSerializer
+    permission_classes = [AllowAny]  # Add this line
 
     def perform_create(self, serializer):
         # Simply save with PENDING status

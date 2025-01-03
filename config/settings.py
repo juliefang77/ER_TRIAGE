@@ -31,6 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # This allows all requests
+    ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
@@ -62,8 +65,9 @@ INSTALLED_APPS = [
     'patient_portal',  # patient app
     'rest_framework', 
     'corsheaders',
-    'rest_framework.authtoken',  # Add this line
+    'rest_framework.authtoken',  # 医院login
     'followup', # followup app
+    'triage_analytics', # 分诊统计
 ]
 
 MIDDLEWARE = [
