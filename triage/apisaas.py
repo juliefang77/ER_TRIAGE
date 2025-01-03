@@ -74,15 +74,6 @@ class TriageHistoryViewSet(viewsets.ModelViewSet):
             'history_info'
         ).all()
         
-        # Add debug logging
-        '''priority_level = self.request.query_params.get('result__priority_level')
-        if priority_level:
-            queryset = queryset.filter(result__priority_level=priority_level)
-            print(f"Priority Level Filter: {priority_level}")
-            print(f"Filtered records: {queryset.count()}")
-            print(f"Filtered IDs: {list(queryset.values_list('id', flat=True))}")
-            
-        return queryset  # Now returns the filtered queryset'''
 
 class SaaSVitalSignsViewSet(viewsets.ModelViewSet):
     queryset = VitalSigns.objects.all()

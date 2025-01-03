@@ -241,6 +241,13 @@ class PatientTriageSubmission(models.Model):
         blank=True
     )
 
+    waitlist_id = models.CharField(
+        max_length=10,
+        verbose_name='分诊排号',
+        null=True,  
+        blank=True,
+    )
+
     class Meta:
         verbose_name = '患者分诊提交'
         verbose_name_plural = '患者分诊提交'

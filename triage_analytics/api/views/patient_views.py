@@ -1,23 +1,25 @@
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny  # Add this import
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import ValidationError
-from triage.models import HospitalUser, Hospital, TriageRecord
+from triage.models import HospitalUser, Hospital, TriageRecord, TriageResult
+from django.db.models import Count  # Add this import at the top
 
 from ..serializers.patient_serializers import DateRangeSerializer, DistributionResponseSerializer
 from ...services.stats.patient_stats import PatientDistributionStats
 
-class PatientStatsViewSet(ViewSet):
+class PatientStatsViewSet(ReadOnlyModelViewSet):  # Change to ReadOnlyModelViewSet
+    serializer_class = DateRangeSerializer  # Add a serializer class
     permission_classes = [IsAuthenticated]
-    # permission_classes = [AllowAny]  
 
     def get_queryset(self):
-        # Get base queryset filtered by hospital
+        # Explicitly start with TriageRecord
         return TriageRecord.objects.filter(
-            hospital=self.request.user.hospital
-        )
+            hospital=self.request.user
+        ).select_related('result')  # Add this to optimize the query
     
     def _get_validated_dates(self, request):
         """Helper method to validate date parameters"""
@@ -27,13 +29,7 @@ class PatientStatsViewSet(ViewSet):
 
     @action(detail=False, methods=['GET'])
     def priority_distribution(self, request):
-        """
-        获取急诊患者分级分布
-        GET /apichart/patientstats/priority_distribution/
-        """
-        user: HospitalUser = request.user  # Type hint for user
-
-        if not request.user.hospital:
+        if not isinstance(request.user, HospitalUser):  # Better type check
             raise ValidationError("用户未关联医院")
             
         dates = self._get_validated_dates(request)
@@ -52,11 +48,7 @@ class PatientStatsViewSet(ViewSet):
 
     @action(detail=False, methods=['GET'])
     def department_distribution(self, request):
-        """
-        获取急诊患者科室分布
-        GET /api/triage-analytics/patient-stats/department-distribution/
-        """
-        if not request.user.hospital:
+        if not isinstance(request.user, HospitalUser):  # Better type check
             raise ValidationError("用户未关联医院")
             
         dates = self._get_validated_dates(request)
@@ -77,7 +69,7 @@ class PatientStatsViewSet(ViewSet):
     def all_distributions(self, request):
         # 获取所有分布统计
         # GET /api/triage-analytics/patient-stats/all-distributions/
-        if not request.user.hospital:
+        if not isinstance(request.user, HospitalUser):  # Better type check
             raise ValidationError("用户未关联医院")
             
         dates = self._get_validated_dates(request)

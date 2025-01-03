@@ -1,5 +1,6 @@
 # patient_portal/apipatient.py
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework import views
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -24,6 +25,8 @@ class PatientTriageSubmissionViewSet(viewsets.ModelViewSet):
 # This is the API for listing all PENDING submissions
 class PendingSubmissionViewSet(viewsets.ReadOnlyModelViewSet):  # Changed to ReadOnlyModelViewSet
     serializer_class = PendingSubmissionListSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         return PatientTriageSubmission.objects.filter(
@@ -34,6 +37,7 @@ class PendingSubmissionViewSet(viewsets.ReadOnlyModelViewSet):  # Changed to Rea
 # This API should be called when nurse opens a pre-filled triage form. Data-mapping is included here
 class PendingSubmissionDataViewSet(viewsets.ViewSet):  # Changed to ViewSet
     serializer_class = PendingSubmissionMappingSerializer
+    permission_classes = [AllowAny]  # Add this line
     
     def retrieve(self, request, pk=None):
         try:

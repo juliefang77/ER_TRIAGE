@@ -1,104 +1,95 @@
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from triage.models import TriageRecord, TriageResult, HospitalUser, Hospital
-from datetime import datetime
+from datetime import datetime, time
+from django.utils import timezone
 
 class PatientDistributionStats:
     def __init__(self, queryset, start_date=None, end_date=None):
-        # param hospital: HospitalUser instance from request.user.hospital
-        # param start_date: YYYY-MM-DD string
-        # @param end_date: YYYY-MM-DD string
-
-        # Handle both Hospital and HospitalUser instances
-        self.queryset = queryset
+        self.queryset = queryset.select_related('result')
+        
+        # Filter by the logged-in hospital user's hospital
+        hospital = queryset.model._default_manager.first().hospital
+        self.queryset = self.queryset.filter(hospital=hospital)
         
         if start_date and end_date:
+            # Convert dates to timezone-aware datetime objects
+            start_datetime = timezone.make_aware(
+                datetime.combine(start_date, time.min)
+            )
+            end_datetime = timezone.make_aware(
+                datetime.combine(end_date, time.max)
+            )
+            
             self.queryset = self.queryset.filter(
-                registration_time__date__range=[start_date, end_date]
+                registration_time__gte=start_datetime,
+                registration_time__lte=end_datetime
             )
             
         self.total_patients = self.queryset.count()
-
-
+              
     def get_priority_level_distribution(self):
-        # 获取急诊患者分级分布 based on registration_time
-        # Only counting patients with assigned priority levels
+        # Remove the .exclude() call since we want to count all records
+        # Use INNER JOIN instead of LEFT OUTER JOIN
         distribution = self.queryset.select_related('result')\
-            .exclude(result__priority_level__isnull=True)\
             .values('result__priority_level')\
             .annotate(count=Count('id'))\
             .order_by('result__priority_level')
-
-        level_counts = {
-            item['result__priority_level']: item['count']
-            for item in distribution 
-        }
-
-        labels = []
-        data = []
-
-        # Only process assigned priority levels
-        for level_num, level_name in TriageResult.PRIORITY_LEVELS:
-            labels.append(level_name)
-            count = level_counts.get(level_num, 0)
-            data.append(count)
-
-        # Calculate total of only assigned patients
-        total_assigned = sum(data)
-
-        # Calculate percentages based only on assigned patients
-        percentages = [
-            round((count / total_assigned * 100), 1) 
-            if total_assigned > 0 else 0
-            for count in data
-        ]
-
-        return {
-            'labels': labels,  # Will contain: ['一级', '二级', '三级', '四级']
-            'data': data,
-            'total': total_assigned,  # Only counts patients with priority levels
+    
+        priority_levels = ['一级', '二级', '三级', '四级']
+        counts = [0] * 4
+        percentages = [0.0] * 4
+        total = 0
+    
+        for item in distribution:
+            level = item['result__priority_level']
+            count = item['count']
+            if level is not None:  # Only process non-null levels
+                level_index = level - 1  # Convert level (1-4) to index (0-3)
+                counts[level_index] = count
+                total += count
+    
+        # Calculate percentages after we have the total
+        if total > 0:
+            for i in range(4):
+                percentages[i] = (counts[i] / total) * 100
+    
+        final_result = {
+            'labels': priority_levels,
+            'data': counts,
+            'total': total,
             'percentages': percentages
         }
-    
+        print("4. Final result:", final_result)
+        return final_result
+         
     
     def get_department_distribution(self):
-        # 科室分布
         distribution = self.queryset.select_related('result')\
-            .exclude(result__department__isnull=True)\
-            .exclude(result__department='')\
             .values('result__department')\
             .annotate(count=Count('id'))\
             .order_by('result__department')
 
-        # Create a dictionary mapping department codes to their counts
-        dept_counts = {
-            item['result__department']: item['count']
-            for item in distribution
-        }
+        # Use dictionary to consolidate departments
+        dept_counts = {}
+        total = 0
 
-        labels = []
-        data = []
+        # Process results and combine duplicates
+        for item in distribution:
+            dept = item['result__department'] or '未分类'  # Handle null/empty as '未分类'
+            count = item['count']
+            # Add to existing count or create new entry
+            dept_counts[dept] = dept_counts.get(dept, 0) + count
+            total += count
 
-        # Process all predefined departments
-        for dept_code, dept_name in TriageResult.DEPARTMENT_CHOICES:
-            labels.append(dept_name)
-            count = dept_counts.get(dept_code, 0)
-            data.append(count)
-
-        # Calculate total of only assigned patients
-        total_assigned = sum(data)
-
-        # Calculate percentages based only on assigned patients
-        percentages = [
-            round((count / total_assigned * 100), 1) 
-            if total_assigned > 0 else 0
-            for count in data
-        ]
+        # Convert to sorted lists
+        departments = list(dept_counts.keys())
+        counts = [dept_counts[dept] for dept in departments]
+        percentages = [(count / total * 100) if total > 0 else 0 for count in counts]
 
         return {
-            'labels': labels,  # Will contain Chinese department names
-            'data': data,
-            'total': total_assigned,
+            'labels': departments,
+            'data': counts,
+            'total': total,
             'percentages': percentages
         }
-    
