@@ -89,8 +89,8 @@ class SaaSMedicalStaffViewSet(viewsets.ModelViewSet):
     queryset = MedicalStaff.objects.all()
     serializer_class = MedicalStaffSerializer
 
-#Authentication for hospitals
 
+#Authentication for hospitals
 class CustomAuthToken(ObtainAuthToken):
     serializer_class = HospitalLoginSerializer  # Specify the serializer class
     

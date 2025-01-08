@@ -169,3 +169,10 @@ CORS_ALLOW_ALL_ORIGINS = True  # For development only
 # ]
 
 AUTH_USER_MODEL = 'triage.HospitalUser'
+
+ALIYUN_SMS = {
+    'ACCESS_KEY_ID': 'your_key_id',
+    'ACCESS_KEY_SECRET': 'your_key_secret',
+    'TEMPLATE_CODE': 'SMS_123456789',
+    'SIGN_NAME': '您的签名'
+}

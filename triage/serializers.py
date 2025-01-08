@@ -18,6 +18,14 @@ class HospitalSerializer(serializers.ModelSerializer):
         model = Hospital
         fields = '__all__'
 
+# For other serializers to use to filter for their own patients
+class HospitalUserFilterSerializer(serializers.ModelSerializer):
+    hospital = HospitalSerializer(read_only=True)  
+    
+    class Meta:
+        model = HospitalUser
+        fields = ['id', 'hospital'] 
+
 class MedicalStaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicalStaff

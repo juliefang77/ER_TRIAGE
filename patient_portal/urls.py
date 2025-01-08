@@ -1,6 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .apipatient import PendingSubmissionViewSet, PendingSubmissionDataViewSet, PatientTriageSubmissionViewSet
+from .views import PendingSubmissionViewSet, PendingSubmissionDataViewSet, PatientTriageSubmissionViewSet
+# Authentication
+from django.urls import path
+from .views.patient import request_login, verify_code
 
 router = DefaultRouter()
 
@@ -15,4 +18,6 @@ router.register(r'autofilltriage', PendingSubmissionDataViewSet, basename='autof
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('login/', request_login, name='patient-login'),
+    path('verify/', verify_code, name='patient-verify'),
 ]

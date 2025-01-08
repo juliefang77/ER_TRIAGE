@@ -22,7 +22,6 @@ class PatientStatsViewSet(ReadOnlyModelViewSet):  # Change to ReadOnlyModelViewS
         ).select_related('result')  # Add this to optimize the query
     
     def _get_validated_dates(self, request):
-        """Helper method to validate date parameters"""
         date_serializer = DateRangeSerializer(data=request.query_params)
         date_serializer.is_valid(raise_exception=True)
         return date_serializer.validated_data
@@ -68,7 +67,7 @@ class PatientStatsViewSet(ReadOnlyModelViewSet):  # Change to ReadOnlyModelViewS
     @action(detail=False, methods=['GET'])
     def all_distributions(self, request):
         # 获取所有分布统计
-        # GET /api/triage-analytics/patient-stats/all-distributions/
+        # GET http://127.0.0.1:8000/apichart/patientstats/all-distributions/
         if not isinstance(request.user, HospitalUser):  # Better type check
             raise ValidationError("用户未关联医院")
             
