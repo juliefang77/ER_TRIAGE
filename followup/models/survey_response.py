@@ -1,6 +1,6 @@
 from django.db import models
-import uuid
 from .followup_survey import FollowupSurvey
+from django.utils import timezone
 
 class SurveyResponse(models.Model):
 
@@ -83,7 +83,7 @@ class SurveyResponse(models.Model):
     # Fields:
     # 1. hospital | 医院 | ForeignKey (HospitalUser)
     # 2. survey | 问卷 | OneToOneField (FollowupSurvey)
-    # 3. uuid | UUID | UUIDField
+    # 3. id | normal id
     # 4. answer_1 | 答案一 | TextField
     # 5. answer_2 | 答案二 | TextField
     # 6. answer_3 | 答案三 | TextField
@@ -92,3 +92,4 @@ class SurveyResponse(models.Model):
     # 9. answer_6 | 答案六 | TextField
     # 10. answer_7 | 答案七 | TextField
     # 11. answer_8 | 答案八 | TextField
+    # 12. submitted_at | 提交时间 

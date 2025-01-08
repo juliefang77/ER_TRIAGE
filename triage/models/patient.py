@@ -79,6 +79,14 @@ class Patient(models.Model):
         verbose_name='唯一标识'
     )
 
+    patient_user = models.OneToOneField(
+        'patient_portal.PatientUser',
+        on_delete=models.SET_NULL,  # If PatientUser is deleted, keep Patient record
+        null=True,
+        blank=True,
+        verbose_name='患者账号'
+    )
+
     # used for integrating with other HIS softwares
     id_his = models.CharField(
         max_length=50,
@@ -301,3 +309,4 @@ class Patient(models.Model):
 # 22. emergency_relation | 紧急联系人关系 | CharField
 # 23. patient_type | 身份标识 | CharField (choices: "THREE_NO", "LOW_INCOME", "SPECIAL_POVERTY", "CARD_POVERTY", "FIVE_GUARANTEE", "MILITARY_8023", "ACTIVE_MILITARY", "RETIRED_MILITARY", "ORPHANED")
 # 24. allergies | 过敏史 | TextField
+# patient_user | onetoone to PatientUser in patient_portal app

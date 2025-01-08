@@ -1,5 +1,5 @@
 from ..models.patient_triage import PatientTriageSubmission
-from ..patient_serializer import (
+from ..serializers.patient_serializer import (
     PatientTriageSubmissionSerializer,
 )
 from rest_framework.permissions import AllowAny

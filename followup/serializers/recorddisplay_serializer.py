@@ -14,7 +14,22 @@ class FollowupTriageRecordSerializer(serializers.ModelSerializer):
     hospital = HospitalUserFilterSerializer(required=False, allow_null=True)
     recipient = FollowupRecipientSerializer(required=False, allow_null=True)
     result = TriageResultSerializer(required=False, allow_null=True) 
+    has_followup = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = TriageRecord
-        fields = '__all__'
+        fields = [
+            'id',
+            'patient',
+            'nurse',
+            'hospital',
+            'recipient',
+            'result',
+            'registration_time',  
+            'chief_complaint',
+            'chief_symptom',
+            'medical_history',
+            'surgery_type',
+            'ifmass_injury',
+            'has_followup'       # annotated field
+        ]

@@ -1,14 +1,10 @@
 # patient_portal/models/patient_user.py
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-import uuid
+from triage.models import Patient
 
 class PatientUser(AbstractUser):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
+
     phone = models.CharField(
         max_length=20, 
         unique=True,
@@ -38,6 +34,11 @@ class PatientUser(AbstractUser):
     
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
+
+    @property
+    def patient(self):
+        """Get associated Patient record"""
+        return Patient.objects.filter(patient_user=self).first()
 
     class Meta:
         verbose_name = '患者用户'

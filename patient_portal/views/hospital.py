@@ -4,7 +4,7 @@ from rest_framework import views
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from ..models import PatientTriageSubmission
-from ..patient_serializer import (
+from ..serializers.patient_serializer import (
     PendingSubmissionListSerializer,  
     PendingSubmissionMappingSerializer
 )

@@ -1,9 +1,16 @@
 from django.db import models
-import uuid
 from .followup_recipient import FollowupRecipient
 from .survey_template import SurveyTemplate
+from django.utils import timezone
+from django.conf import settings
+import pytz
 
 class FollowupSurvey(models.Model):
+    STATUS_CHOICES = [
+        ('NO_SEND', '未发送'),
+        ('NO_RESPONSE', '已发送未完成'),
+        ('YES_RESPONSE', '已完成')
+    ]
 
     hospital = models.ForeignKey(
         'triage.HospitalUser',
@@ -31,8 +38,24 @@ class FollowupSurvey(models.Model):
         blank=True
     )
 
+    created_at = models.DateTimeField(
+        default=timezone.now,  # Changed to default instead of auto_now_add
+        verbose_name='发送时间',
+        null=True,
+        blank=True
+    )
+
     completed_at = models.DateTimeField(
         verbose_name='填写时间',
+        null=True,
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='NO_SEND',
+        verbose_name='完成状态',
         null=True,
         blank=True
     )
@@ -56,3 +79,5 @@ class FollowupSurvey(models.Model):
     # 3. recipient | 问卷填写人 | ForeignKey (FollowupRecipient)
     # 4. template | 问卷模版 | ForeignKey (SurveyTemplate)
     # 5. completed_at | 填写时间 | DateTimeField
+    # 6. status | 完成状态 ｜ Charfield (choices)
+    # 7. created_at | 发送时间 ｜ DateTimeField

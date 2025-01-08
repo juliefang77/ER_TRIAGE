@@ -1,6 +1,6 @@
 from django.db import models
-import uuid
 from .standard_question import StandardQuestion
+from django.utils import timezone
 
 class SurveyTemplate(models.Model):
 
@@ -15,6 +15,13 @@ class SurveyTemplate(models.Model):
         'triage.HospitalUser',
         on_delete=models.CASCADE,
         verbose_name='医院',
+        null=True,
+        blank=True
+    )
+
+    submitted_at = models.DateTimeField(
+        default=timezone.now,  # Using timezone.now instead of auto_now_add
+        verbose_name='提交时间',
         null=True,
         blank=True
     )
@@ -92,9 +99,8 @@ class SurveyTemplate(models.Model):
         blank=True
     )
 
-    created_by = models.ForeignKey(
-        'triage.MedicalStaff',
-        on_delete=models.SET_NULL,
+    created_by = models.CharField(  # Changed from ForeignKey to CharField
+        max_length=100,
         verbose_name='模版创建人',
         null=True,
         blank=True
