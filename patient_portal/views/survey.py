@@ -2,14 +2,14 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.utils import timezone
 
 # Import models from followup app
 from followup.models import FollowupSurvey, SurveyResponse
 
 # Import serializers (you'll need to create these in patient_portal)
-from followup.serializers.survey_serializer import (
+from patient_portal.serializers.survey_serializer import (
     PatientSurveySerializer,
     SurveyResponseSerializer
 )
@@ -17,13 +17,21 @@ from rest_framework.permissions import AllowAny
 
 class PatientSurveyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PatientSurveySerializer
-    permission_classes = [AllowAny]  # Simplified for now
+    permission_classes = [AllowAny]  # Allow any access
+    authentication_classes = []  # No authentication required
 
     def get_queryset(self):
+        # Get phone from request params
+        phone = self.request.query_params.get('phone')
+        if not phone:
+            return FollowupSurvey.objects.none()
+        
+        # Remove any reference to request.user
         return FollowupSurvey.objects.filter(
-            recipient__patient__patient_user=self.request.user,  # More explicit way
-            status__in=['NO_SEND', 'NO_RESPONSE']  # Updated status choices
-        ).select_related('template')
+            recipient__patient__patient_user__phone=phone,
+            recipient__survey_status='NO_RESPONSE'
+        ).select_related('template', 'hospital')
+
 
     @action(detail=True, methods=['post'])
     def submit_response(self, request, pk=None):

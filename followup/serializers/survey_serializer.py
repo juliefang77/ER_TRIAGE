@@ -8,6 +8,7 @@ class StandardQuestionSerializer(serializers.ModelSerializer):
         model = StandardQuestion
         fields = '__all__'
 
+# 为看template 的 API准备
 class SurveyTemplateDetailSerializer(serializers.ModelSerializer):
     # Nested serializer for questions
     questions = serializers.SerializerMethodField()
@@ -43,36 +44,6 @@ class SurveyTemplateDetailSerializer(serializers.ModelSerializer):
                     'choice_five': question.choice_five,
                 })
         return questions
-
-class PatientSurveyTemplateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SurveyTemplate
-        fields = [
-            'id',
-            'survey_name',
-            'question_1',
-            'question_2',
-            'question_3',
-            'question_4',
-            'question_5',
-            'question_6',
-            'question_7',
-            'question_8'
-        ]
-
-class PatientSurveySerializer(serializers.ModelSerializer):
-    template = PatientSurveyTemplateSerializer(source='template', read_only=True)
-
-    class Meta:
-        model = FollowupSurvey
-        fields = [
-            'id',
-            'template',
-            'status',
-            'created_at',
-            'completed_at'
-        ]
-        read_only_fields = ['status', 'created_at', 'completed_at']
 
 class SurveyResponseSerializer(serializers.ModelSerializer):
     class Meta:

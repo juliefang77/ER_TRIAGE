@@ -19,13 +19,6 @@ class SurveyTemplate(models.Model):
         blank=True
     )
 
-    submitted_at = models.DateTimeField(
-        default=timezone.now,  # Using timezone.now instead of auto_now_add
-        verbose_name='提交时间',
-        null=True,
-        blank=True
-    )
-
     # Eight question fields
     question_1 = models.ForeignKey(
         'StandardQuestion',

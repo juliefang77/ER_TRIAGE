@@ -69,15 +69,15 @@ class SurveyTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(FollowupRecipient)
 class FollowupRecipientAdmin(admin.ModelAdmin):
-    list_display = ['patient', 'hospital', 'message_reply', 'survey_status', 'call_status']
-    list_filter = ['hospital', 'survey_status', 'call_status']
-    search_fields = ['patient__name']  # Assuming Patient model has a name field
+    list_display = ['patient', 'phone', 'research_patient', 'survey_status', 'call_status']
+    list_filter = ['research_patient', 'survey_status', 'call_status']
+    search_fields = ['phone', 'patient__name_patient']
 
 @admin.register(FollowupSurvey)
 class FollowupSurveyAdmin(admin.ModelAdmin):
     list_display = ['recipient', 'template', 'completed_at']
     list_filter = ['hospital', 'completed_at']
-    search_fields = ['recipient__patient__name']
+    search_fields = ['recipient__patient__name_patient']
 
 @admin.register(SurveyResponse)
 class SurveyResponseAdmin(admin.ModelAdmin):

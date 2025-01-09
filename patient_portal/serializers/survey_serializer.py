@@ -19,13 +19,14 @@ class PatientSurveyTemplateSerializer(serializers.ModelSerializer):
 
 class PatientSurveySerializer(serializers.ModelSerializer):
     template = PatientSurveyTemplateSerializer(source='template', read_only=True)
-
+    survey_status = serializers.CharField(source='recipient.survey_status', read_only=True)
+    
     class Meta:
         model = FollowupSurvey
         fields = [
             'id',
             'template',
-            'status',
+            'survey_status',
             'created_at',
             'completed_at'
         ]

@@ -1,7 +1,7 @@
 # patient_portal/admin.py
 
 from django.contrib import admin
-from .models import PatientTriageSubmission
+from .models import PatientTriageSubmission, PatientUser
 
 @admin.register(PatientTriageSubmission)
 class PatientTriageSubmissionAdmin(admin.ModelAdmin):
@@ -52,3 +52,18 @@ class PatientTriageSubmissionAdmin(admin.ModelAdmin):
             return ', '.join(pos for pos in positions)
         return '-'
     get_injury_positions.short_description = '损伤部位'  # Column header in list view
+
+@admin.register(PatientUser)
+class PatientUserAdmin(admin.ModelAdmin):
+    list_display = ('phone', 'name_patient', 'patient_phone', 'is_verified', 'is_active', 'date_joined')
+    list_filter = ('is_verified', 'is_active')
+    search_fields = ('phone', 'patient__name_patient', 'patient__patient_phone')
+    ordering = ('-date_joined',)
+
+    def name_patient(self, obj):
+        return obj.patient.name_patient if obj.patient else '-'
+    name_patient.short_description = '患者姓名'
+
+    def patient_phone(self, obj):
+        return obj.patient.patient_phone if obj.patient else '-'
+    patient_phone.short_description = '患者电话'

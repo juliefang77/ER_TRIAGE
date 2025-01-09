@@ -5,22 +5,22 @@ from triage.models import TriageRecord, HospitalUser, Patient
 class FollowupRecipient(models.Model):
     
     MESSAGE_REPLY_CHOICES = [
-        ('WEEKEND', '周末'),
-        ('WEEKDAY', '周中白天'),
-        ('WEEKNIGHT', '周中晚上'),
-        ('ANYTIME', '任意时间'),
-        ('NO_REPLY', '未回复')
+        ('WEEKEND', '周末 (WEEKEND)'),
+        ('WEEK_DAY', '周中白天 (WEEK_DAY)'),
+        ('WEEK_NIGHT', '周中晚上 (WEEK_NIGHT)'),
+        ('ANYTIME', '任意时间 (ANYTIME)'),
+        ('NOT_YET', '未回复 (NOT_YET)')
     ]
-    
+
     SURVEY_STATUS_CHOICES = [
-        ('NOT_SENT', '未发送'),
-        ('SENT_INCOMPLETE', '已发送未完成'),
-        ('COMPLETED', '已完成')
+        ('NO_SEND', '未发送 (NO_SEND)'),
+        ('NO_RESPONSE', '已发送未完成 (NO_RESPONSE)'),
+        ('YES_RESPONSE', '已完成 (YES_RESPONSE)')
     ]
-    
+
     CALL_STATUS_CHOICES = [
-        ('CALLED', '已电话随访'),
-        ('NOT_CALLED', '未电话随访')
+        ('YES_CALL', '已电话随访 (YES_CALL)'),
+        ('NO_CALL', '未电话随访 (NO_CALL)')
     ]
     
     patient = models.ForeignKey(
@@ -46,7 +46,22 @@ class FollowupRecipient(models.Model):
         null=True,
         blank=True
     )
-    
+
+    # Add phone field
+    phone = models.CharField(
+        max_length=20,
+        verbose_name='联系电话',
+        null=True,
+        blank=True
+    )
+
+    # Add research_patient field
+    research_patient = models.BooleanField(
+        verbose_name='重点随访对象',
+        null=True,
+        blank=True
+    )
+
     message_reply = models.CharField(
         max_length=20,
         choices=MESSAGE_REPLY_CHOICES,
@@ -88,3 +103,5 @@ class FollowupRecipient(models.Model):
     # 5. message_reply | 回复时间偏好 | CharField (choices)
     # 6. survey_status | 问卷状态 | CharField (choices)
     # 7. call_status | 电话随访状态 | CharField (choices)
+    # phone | 
+    # research_patient | 

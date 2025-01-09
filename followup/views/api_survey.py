@@ -115,7 +115,6 @@ class SystemTemplateViewSet(viewsets.ReadOnlyModelViewSet):
             'question_8'
         )
 
-# 群发surveys给患者app
 # 群发系统预设surveys给患者app
 class MassSendSurveyViewSet(ViewSet):
     """ViewSet for mass sending system survey templates to patients"""
@@ -153,7 +152,7 @@ class MassSendSurveyViewSet(ViewSet):
             patient = TriageRecord.objects.get(id=record_id).patient
             if not patient.patient_user:
                 continue  # Skip if patient doesn't have an app account
-            
+
             recipient, _ = FollowupRecipient.objects.get_or_create(
                 triage_record_id=record_id,
                 hospital=request.user,
