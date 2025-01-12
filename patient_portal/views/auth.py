@@ -53,7 +53,6 @@ def verify_registration(request):
 @permission_classes([AllowAny])
 @authentication_classes([])
 def login(request):
-    """Login with phone and password"""
     phone = request.data.get('phone')
     password = request.data.get('password')
     
@@ -65,17 +64,13 @@ def login(request):
             
         if not check_password(password, patient_user.password):
             return Response({'error': 'Invalid password'}, status=400)
-        
-        # Safer way to check for patient
+            
+        # Link all matching patients
         has_patient = False
-        try:
-            matching_patient = Patient.objects.get(patient_phone=phone)
-            if not hasattr(patient_user, 'patient'):  # Check if relation exists
-                matching_patient.patient_user = patient_user
-                matching_patient.save()
+        matching_patients = Patient.objects.filter(patient_phone=phone)
+        if matching_patients.exists():
+            matching_patients.update(patient_user=patient_user)
             has_patient = True
-        except Patient.DoesNotExist:
-            pass
             
         return Response({
             'message': 'Login successful',

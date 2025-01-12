@@ -45,19 +45,27 @@ class PatientSurveyViewSet(viewsets.ReadOnlyModelViewSet):
 
         response_serializer = SurveyResponseSerializer(data=request.data)
         if response_serializer.is_valid():
-            SurveyResponse.objects.create(
+            # Create response without submitted_at in validated_data
+            response = SurveyResponse.objects.create(
                 hospital=survey.hospital,
                 survey=survey,
-                submitted_at=timezone.now(),
                 **response_serializer.validated_data
             )
-            
-            survey.status = 'YES_RESPONSE'
+        
+            # Update timestamps separately
+            response.submitted_at = timezone.now()
+            response.save()
+        
+            # Update both survey and recipient status
             survey.completed_at = timezone.now()
             survey.save()
+        
+            # Make sure we update the recipient's survey status
+            survey.recipient.survey_status = 'YES_RESPONSE' # Recipient survey_status
+            survey.recipient.save()
 
             return Response({"message": "Survey submitted successfully"})
-        
+    
         return Response(
             response_serializer.errors,
             status=status.HTTP_400_BAD_REQUEST

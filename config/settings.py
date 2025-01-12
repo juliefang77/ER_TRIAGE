@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'triage.apps.TriageConfig',  # Change from 'triage' to use AppConfig
     'patient_portal',  # patient app
+    'ai_services', # AI 功能
     'rest_framework', 
     'corsheaders',
     'rest_framework.authtoken',  # 医院login

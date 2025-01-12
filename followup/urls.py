@@ -1,6 +1,14 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from .views import FollowupRecordDisplayViewSet, AddToFollowupViewSet, StandardQuestionViewSet, SurveyTemplateViewSet, SystemTemplateViewSet, MassSendSurveyViewSet
+from .views import (
+FollowupRecordDisplayViewSet, 
+AddToFollowupViewSet, 
+StandardQuestionViewSet, 
+SurveyTemplateViewSet, 
+SystemTemplateViewSet, 
+MassSendSurveyViewSet, 
+ManagementSurveyHistoryViewSet
+)
 
 router = DefaultRouter()
 
@@ -23,6 +31,13 @@ router.register(r'system-templates', SystemTemplateViewSet, basename='system-tem
 
 # 群发系统生成的surveys
 router.register(r'mass-survey', MassSendSurveyViewSet, basename='mass-survey')
+
+ # urls.py
+router.register(
+    r'management-surveys-history', 
+    ManagementSurveyHistoryViewSet, 
+    basename='management-survey-history'  # Changed to unique basename
+)
 
 urlpatterns = [
     path('', include(router.urls)),

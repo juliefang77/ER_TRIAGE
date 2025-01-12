@@ -51,15 +51,6 @@ class FollowupSurvey(models.Model):
         blank=True
     )
 
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='NO_SEND',
-        verbose_name='完成状态',
-        null=True,
-        blank=True
-    )
-
     class Meta:
         verbose_name = '随访问卷'
         verbose_name_plural = '随访问卷'

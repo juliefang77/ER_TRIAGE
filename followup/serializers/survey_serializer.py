@@ -2,6 +2,7 @@ from rest_framework import serializers
 from ..models import StandardQuestion, SurveyTemplate
 from rest_framework import serializers
 from followup.models import FollowupSurvey, SurveyResponse, SurveyTemplate
+from patient_portal.serializers.survey_serializer import PatientSurveyTemplateSerializer
 
 class StandardQuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,3 +70,72 @@ class MassSendSurveySerializer(serializers.Serializer):
         required=True,
         help_text='ID of the system template to use'
     )
+
+# 查看已发送的 surveys list
+class PatientSurveyHistorySerializer(serializers.ModelSerializer):
+    patient_name = serializers.CharField(source='recipient.patient.name_patient')
+    survey_name = serializers.CharField(source='template.survey_name')
+    survey_status = serializers.CharField(source='recipient.survey_status')  # Fix: get from recipient
+    
+    class Meta:
+        model = FollowupSurvey
+        fields = [
+            'id',
+            'patient_name',
+            'survey_name',
+            'created_at',
+            'completed_at',
+            'survey_status'
+        ]
+
+# 查看某一个具体的survey 细节
+class ManagementSurveyDetailSerializer(serializers.ModelSerializer):
+    patient_name = serializers.CharField(source='recipient.patient.name_patient')
+    survey_name = serializers.CharField(source='template.survey_name')
+    survey_status = serializers.CharField(source='recipient.survey_status')
+    survey_response = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = FollowupSurvey
+        fields = [
+            'id',
+            'patient_name',
+            'survey_name',
+            'created_at',
+            'completed_at',
+            'survey_status',
+            'survey_response'
+        ]
+
+    def get_survey_response(self, obj):
+        try:
+            response = SurveyResponse.objects.get(survey=obj)
+            questions = []
+            
+            # Loop through all 8 questions
+            for i in range(1, 9):
+                question = getattr(obj.template, f'question_{i}')
+                if question:
+                    choices = [
+                        question.choice_one,
+                        question.choice_two,
+                        question.choice_three,
+                        question.choice_four,
+                        question.choice_five
+                    ]
+                    # Remove None/empty choices
+                    choices = [c for c in choices if c]
+                    
+                    questions.append({
+                        'question_number': i,
+                        'question': question.question_text,
+                        'type': question.question_type,
+                        'category': question.question_category,
+                        'choices': choices if question.question_type == 'SINGLE_CHOICE' else None,
+                        'answer': getattr(response, f'answer_{i}')
+                    })
+            
+            return questions
+
+        except SurveyResponse.DoesNotExist:
+            return None

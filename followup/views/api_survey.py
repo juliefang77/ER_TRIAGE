@@ -6,7 +6,13 @@ from rest_framework.authentication import TokenAuthentication
 from triage.models import TriageRecord
 from rest_framework.viewsets import ViewSet  # Add this import
 from ..models import StandardQuestion, SurveyTemplate, FollowupSurvey, FollowupRecipient
-from ..serializers.survey_serializer import StandardQuestionSerializer, SurveyTemplateDetailSerializer, MassSendSurveySerializer
+from ..serializers.survey_serializer import (
+    StandardQuestionSerializer, 
+    SurveyTemplateDetailSerializer, 
+    MassSendSurveySerializer, 
+    PatientSurveyHistorySerializer, 
+    ManagementSurveyDetailSerializer
+)
 
 # GET question bank questions to make survey template
 class StandardQuestionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -173,3 +179,18 @@ class MassSendSurveyViewSet(ViewSet):
             "message": f"Successfully assigned system survey to {len(surveys_created)} patients",
             "surveys_created": len(surveys_created)
         })
+
+# 查看过去发送的 surveys list
+# views.py
+class ManagementSurveyHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return ManagementSurveyDetailSerializer
+        return PatientSurveyHistorySerializer
+
+    def get_queryset(self):
+        return FollowupSurvey.objects.all().select_related(
+            'recipient__patient',
+            'template'
+        ).order_by('-created_at')
+

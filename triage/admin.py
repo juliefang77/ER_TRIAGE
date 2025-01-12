@@ -71,7 +71,7 @@ class TriageResultInline(admin.StackedInline):
     ]
 
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('name_patient', 'pinyin_name', 'gender', 'age', 'patient_phone', 'hospital')
+    list_display = ('name_patient', 'pinyin_name', 'gender', 'age', 'patient_phone', 'hospital','patient_user')
     search_fields = ['name_patient', 'pinyin_name', 'id_number', 'patient_phone']
     list_filter = ['gender', 'hospital']
     

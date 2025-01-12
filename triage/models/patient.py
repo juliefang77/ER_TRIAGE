@@ -79,12 +79,12 @@ class Patient(models.Model):
         verbose_name='唯一标识'
     )
 
-    patient_user = models.OneToOneField(
+    patient_user = models.ForeignKey(
         'patient_portal.PatientUser',
-        on_delete=models.SET_NULL,  # If PatientUser is deleted, keep Patient record
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='患者账号'
+        related_name='patients'  # Now one user can have multiple patients
     )
 
     # used for integrating with other HIS softwares
@@ -282,6 +282,7 @@ class Patient(models.Model):
             elif self.id_type == 'PASSPORT':
                 if not re.match(r'^[A-Z]{1,2}\d{7,8}$', self.id_number):
                     raise ValidationError({'id_number': '护照号码格式不正确'})
+
 
 
 # Fields:

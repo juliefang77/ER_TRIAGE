@@ -4,7 +4,8 @@ from .models import (
     SurveyTemplate,
     FollowupRecipient,
     FollowupSurvey,
-    SurveyResponse
+    SurveyResponse,
+    FollowupNotetaking
 )
 
 @admin.register(StandardQuestion)
@@ -69,19 +70,27 @@ class SurveyTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(FollowupRecipient)
 class FollowupRecipientAdmin(admin.ModelAdmin):
-    list_display = ['patient', 'phone', 'research_patient', 'survey_status', 'call_status']
+    list_display = ['patient_name', 'phone', 'research_patient', 'survey_status', 'call_status']
     list_filter = ['research_patient', 'survey_status', 'call_status']
     search_fields = ['phone', 'patient__name_patient']
 
+    def patient_name(self, obj):
+        return obj.patient.name_patient if obj.patient else '-'
+    patient_name.short_description = '患者姓名'  # Column header in admin
+
 @admin.register(FollowupSurvey)
 class FollowupSurveyAdmin(admin.ModelAdmin):
-    list_display = ['recipient', 'template', 'completed_at']
+    list_display = ['recipient', 'template', 'completed_at', 'patient_name']
     list_filter = ['hospital', 'completed_at']
     search_fields = ['recipient__patient__name_patient']
 
+    def patient_name(self, obj):
+        return obj.recipient.patient.name_patient if obj.recipient and obj.recipient.patient else '-'
+    patient_name.short_description = '患者姓名'  # Column header in admin 
+
 @admin.register(SurveyResponse)
 class SurveyResponseAdmin(admin.ModelAdmin):
-    list_display = ['survey', 'hospital']
+    list_display = ['patient_name', 'survey', 'hospital']
     list_filter = ['hospital']
     fieldsets = [
         ('基本信息', {
@@ -100,3 +109,17 @@ class SurveyResponseAdmin(admin.ModelAdmin):
             ]
         })
     ]
+
+    def patient_name(self, obj):
+        return obj.survey.recipient.patient.name_patient if obj.survey and obj.survey.recipient and obj.survey.recipient.patient else '-'
+    patient_name.short_description = '患者姓名'  # Column header in admin
+
+@admin.register(FollowupNotetaking)
+class FollowupNotetakingAdmin(admin.ModelAdmin):
+    list_display = ['patient_name', 'created_by', 'created_at', 'raw_notes', 'processed_notes']
+    list_filter = ['created_at', 'hospital']
+    search_fields = ['recipient__patient__name_patient', 'raw_notes']
+    
+    def patient_name(self, obj):
+        return obj.recipient.patient.name_patient if obj.recipient and obj.recipient.patient else '-'
+    patient_name.short_description = '患者姓名'  # Column header in admin
