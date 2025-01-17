@@ -1,8 +1,9 @@
 import requests
 from django.conf import settings
 from ai_services.serializers.survey_serializer import SurveyLLMAnalysisSerializer
-from followup.models import FollowupSurvey
+from followup.models import FollowupRecipient, SurveyAi
 import json
+from .ai_config import BaiduAIConfig
 
 class SurveyAnalysisService:
     def __init__(self):
@@ -72,29 +73,112 @@ class SurveyAnalysisService:
             print(f"Error making API call: {str(e)}")
             return None
 
-    def analyze_surveys(self, recipient_ids, prompt_template):
-        """Main method to analyze surveys"""
-        # Get access token first
-        self.access_token = self._get_access_token()
-        if not self.access_token:
-            return None
+    def _format_messages(self, prompt):
+        """Format prompt into proper message structure"""
+        return {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "penalty_score": 1.2,
+            "stream": False
+        }
 
-        # Get survey data
-        surveys = FollowupSurvey.objects.filter(
-            recipient__id__in=recipient_ids,
-            recipient__survey_status='YES_RESPONSE'
+    def _handle_response(self, response):
+        """Handle the API response and extract relevant information"""
+        try:
+            if not response:
+                raise ValueError("No response received")
+
+            # Check for basic response structure
+            if 'result' not in response:
+                raise ValueError("No result in API response")
+
+            # Extract important fields
+            result = {
+                'content': response.get('result', ''),           # The actual AI response
+                'id': response.get('id', ''),                    # Conversation ID
+                'is_truncated': response.get('is_truncated', False),  # If response was cut off
+                'need_clear_history': response.get('need_clear_history', False),  # Security check
+                'usage': response.get('usage', {})               # Token usage stats
+            }
+
+            # Log if there are security concerns
+            if result['need_clear_history']:
+                print(f"Security warning for conversation {result['id']}: History should be cleared")
+                
+            # Log if response was truncated
+            if result['is_truncated']:
+                print(f"Warning: Response was truncated for conversation {result['id']}")
+
+            # Extract and log usage statistics
+            usage = result['usage']
+            if usage:
+                print(f"API Usage Stats:")
+                print(f"- Prompt tokens: {usage.get('prompt_tokens', 0)}")
+                print(f"- Completion tokens: {usage.get('completion_tokens', 0)}")
+                print(f"- Total tokens: {usage.get('total_tokens', 0)}")
+
+            # Return the actual content for the survey analysis system
+            return result['content']
+
+        except Exception as e:
+            print(f"Error processing AI response: {str(e)}")
+            return None
+    
+    def analyze_surveys(self, recipient_ids):
+        """Process survey analysis and return result without saving"""
+        if not self.access_token:
+            self.access_token = self._get_access_token()
+
+       # Get recipients data with all needed relations
+        recipients = FollowupRecipient.objects.filter(
+            id__in=recipient_ids,
+            survey_status='YES_RESPONSE'
         ).select_related(
-            'recipient__patient',
-            'recipient__triage_record',
-            'template'
+            'patient',
+            'triage_record'
+        ).prefetch_related(
+            'surveys__template',  # Using correct related_name 'surveys'
+            'surveys__response'
         )
-        surveys_data = SurveyLLMAnalysisSerializer(surveys, many=True).data
-        
-        # Format prompt with survey data
-        prompt = prompt_template.format(
+
+        # Format data for prompt
+        surveys_data = SurveyLLMAnalysisSerializer(recipients, many=True).data
+        prompt = BaiduAIConfig.SURVEY_ANALYSIS_PROMPT.format(
             surveys=json.dumps(surveys_data, ensure_ascii=False, indent=2)
         )
-        
-        # Make API call
-        return self._make_api_call(prompt)
+
+        # Make API call and process response
+        response = self._make_api_call(prompt)
+        print(f"API Response: {response}")  # Debug log
+        processed_result = self._handle_response(response)
+        print(f"Processed result: {processed_result}")  # Debug log
+
+        if processed_result:
+            return True, {
+                'analysis_result': processed_result,
+                'recipient_ids': recipient_ids
+            }
+
+        return False, "Failed to process survey analysis"
+
+
+    def save_analysis(self, analysis_result, recipient_ids, analysis_name, hospital):
+        """Save the analysis result if user chooses to keep it"""
+        try:
+            survey_ai = SurveyAi.objects.create(
+                hospital=hospital,
+                analysis_name=analysis_name,
+                analysis_result=analysis_result
+            )
+            # Add recipients to the analysis
+            survey_ai.recipients.add(*recipient_ids)
+            return True, survey_ai
+        except Exception as e:
+            return False, str(e)
 

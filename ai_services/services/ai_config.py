@@ -18,19 +18,16 @@ class BaiduAIConfig:
     3. 如果以上三点不存在，就写“无”，不要编造
     """
 
-# followup/prompts/survey_analysis_prompts.py
+    SURVEY_ANALYSIS_PROMPT = """
+    请分析以下患者的随访问卷调查结果。整理成格式如下的文字：
+    1. 患者的专科类型分布：
+    2. 恢复情况分布：
+    3. 用药情况：
+    4. 是否加重、有副作用：
+    5. 复诊需求总结：
 
-class SurveyAnalysisPrompts:
-    BASE_PROMPT = """
-    请分析以下患者的随访问卷回复:
+    问卷数据：
     {surveys}
     
-    请提供:
-    1. 患者恢复情况总结
-    2. 需要特别关注的问题
-    3. 建议的后续随访行动
+    请用中文给出符合上述5点格式的分析结果
     """
-    
-    @classmethod
-    def get_prompt(cls):
-        return cls.BASE_PROMPT
