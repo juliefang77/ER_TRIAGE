@@ -3,8 +3,8 @@ from .models import TriageRecord
 
 class TriageRecordFilter(filters.FilterSet):
     # Existing date range filters
-    start_date = filters.DateTimeFilter(field_name='registration_time', lookup_expr='gte')
-    end_date = filters.DateTimeFilter(field_name='registration_time', lookup_expr='lte')
+    start_date = filters.CharFilter(field_name='registration_time', lookup_expr='gte')
+    end_date = filters.CharFilter(field_name='registration_time', lookup_expr='lte')
 
     # TriageResult filters
     priority_level = filters.NumberFilter(

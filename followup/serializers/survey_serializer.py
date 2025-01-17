@@ -9,7 +9,7 @@ class StandardQuestionSerializer(serializers.ModelSerializer):
         model = StandardQuestion
         fields = '__all__'
 
-# 为看template 的 API准备
+# 为看template 的 API准备 (includes question details)
 class SurveyTemplateDetailSerializer(serializers.ModelSerializer):
     # Nested serializer for questions
     questions = serializers.SerializerMethodField()
@@ -60,6 +60,7 @@ class SurveyResponseSerializer(serializers.ModelSerializer):
             'answer_8'
         ]
 
+# 群发survey
 class MassSendSurveySerializer(serializers.Serializer):
     triage_record_ids = serializers.ListField(
         child=serializers.IntegerField(),
@@ -68,7 +69,7 @@ class MassSendSurveySerializer(serializers.Serializer):
     )
     template_id = serializers.IntegerField(
         required=True,
-        help_text='ID of the system template to use'
+        help_text='ID of the template to use'
     )
 
 # 查看已发送的 surveys list
@@ -88,7 +89,7 @@ class PatientSurveyHistorySerializer(serializers.ModelSerializer):
             'survey_status'
         ]
 
-# 查看某一个具体的survey 细节
+# 查看某一个已经填写的具体的survey 细节
 class ManagementSurveyDetailSerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source='recipient.patient.name_patient')
     survey_name = serializers.CharField(source='template.survey_name')
@@ -139,3 +140,9 @@ class ManagementSurveyDetailSerializer(serializers.ModelSerializer):
 
         except SurveyResponse.DoesNotExist:
             return None
+
+# 人工发送问卷页面，左上角“选择问卷模版” search function
+class SurveyTemplateSearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SurveyTemplate
+        fields = ['id', 'survey_name', 'created_at']

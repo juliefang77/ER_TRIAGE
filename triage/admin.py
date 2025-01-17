@@ -236,11 +236,11 @@ class HospitalAdmin(admin.ModelAdmin):
     ]
 
 class HospitalUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'hospital', 'is_active')
+    list_display = ('username', 'email', 'name', 'first_name', 'last_name', 'hospital', 'is_active')
     list_filter = ('is_active', 'hospital')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Personal info', {'fields': ('name', 'first_name', 'last_name', 'email')}),
         ('Hospital info', {'fields': ('hospital',)}),
         ('Permissions', {'fields': ('is_active',)}),
     )

@@ -11,7 +11,8 @@ from ..serializers.survey_serializer import (
     SurveyTemplateDetailSerializer, 
     MassSendSurveySerializer, 
     PatientSurveyHistorySerializer, 
-    ManagementSurveyDetailSerializer
+    ManagementSurveyDetailSerializer,
+    SurveyTemplateSearchSerializer
 )
 
 # GET question bank questions to make survey template
@@ -25,7 +26,7 @@ class StandardQuestionViewSet(viewsets.ReadOnlyModelViewSet):
             is_active=True
         ).order_by('question_category', 'id')
 
-# View existing survey templates, manually create new survey templates
+# View hospital-created survey templates, manually create new survey templates. 人工制作问卷页
 class SurveyTemplateViewSet(viewsets.ModelViewSet):
     serializer_class = SurveyTemplateDetailSerializer
     authentication_classes = [TokenAuthentication]
@@ -99,7 +100,7 @@ class SurveyTemplateViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-# GET 我们定义的templates
+# GET 我们系统定义的templates (not used)
 class SystemTemplateViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for system-defined survey templates"""
     serializer_class = SurveyTemplateDetailSerializer
@@ -130,7 +131,7 @@ class MassSendSurveyViewSet(ViewSet):
     
     @action(detail=False, methods=['post'])
     def assign(self, request):
-        """Assign system survey templates to selected patients"""
+        """Assign survey templates to selected patients"""
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -141,8 +142,7 @@ class MassSendSurveyViewSet(ViewSet):
         # Validate it's a system template
         try:
             template = SurveyTemplate.objects.get(
-                id=template_id,
-                hospital__isnull=True,  # Must be a system template
+                id=template_id, # hospital__isnull=True deleted
                 is_active=True
             )
         except SurveyTemplate.DoesNotExist:
@@ -151,27 +151,33 @@ class MassSendSurveyViewSet(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Assign template to selected patients
         surveys_created = []
         for record_id in triage_record_ids:
-            # Get the patient and check if they have a PatientUser account
+            # Get the patient record
             patient = TriageRecord.objects.get(id=record_id).patient
-            if not patient.patient_user:
+            
+            # Get the PatientUser
+            patient_user = patient.patient_user
+            if not patient_user:
                 continue  # Skip if patient doesn't have an app account
 
+            # Update get_or_create to include patient_user
             recipient, _ = FollowupRecipient.objects.get_or_create(
                 triage_record_id=record_id,
                 hospital=request.user,
                 defaults={
-                    'patient': TriageRecord.objects.get(id=record_id).patient
+                    'patient': patient,
+                    'patient_user': patient_user,  # Add this line
+                    'message_reply': 'NOT_SENT',
+                    'survey_status': 'NO_RESPONSE',  
+                    'call_status': 'NO_CALL'
                 }
             )
 
             survey = FollowupSurvey.objects.create(
                 hospital=request.user,
                 recipient=recipient,
-                template=template,
-                status='NO_SEND'
+                template=template
             )
             surveys_created.append(survey)
 
@@ -181,7 +187,6 @@ class MassSendSurveyViewSet(ViewSet):
         })
 
 # 查看过去发送的 surveys list
-# views.py
 class ManagementSurveyHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -194,3 +199,17 @@ class ManagementSurveyHistoryViewSet(viewsets.ReadOnlyModelViewSet):
             'template'
         ).order_by('-created_at')
 
+# 人工发送问卷页面，左上角“选择问卷模版” search function
+class SurveyTemplateSearchViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for searching available templates when sending surveys"""
+    serializer_class = SurveyTemplateSearchSerializer  # Use simpler serializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        search_query = self.request.query_params.get('search', '')
+        return SurveyTemplate.objects.filter(
+            hospital=self.request.user,
+            is_active=True,
+            survey_name__icontains=search_query
+        ).order_by('-created_at')  # No need for select_related since we don't use questions

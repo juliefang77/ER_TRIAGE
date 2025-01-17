@@ -8,6 +8,12 @@ class HospitalUser(AbstractUser):
         default=uuid.uuid4,
         editable=False
     )
+    name = models.CharField(
+        max_length=100,
+        verbose_name='医院用户名称',
+        null=True,
+        blank=True
+    )
     hospital = models.ForeignKey(
         'Hospital',
         on_delete=models.PROTECT,

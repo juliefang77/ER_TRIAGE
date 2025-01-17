@@ -37,7 +37,7 @@ class PatientSurveyViewSet(viewsets.ReadOnlyModelViewSet):
     def submit_response(self, request, pk=None):
         survey = self.get_object()
         
-        if survey.status == 'YES_RESPONSE':
+        if survey.recipient.survey_status == 'YES_RESPONSE':
             return Response(
                 {"error": "Survey already completed"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -56,7 +56,6 @@ class PatientSurveyViewSet(viewsets.ReadOnlyModelViewSet):
             response.submitted_at = timezone.now()
             response.save()
         
-            # Update both survey and recipient status
             survey.completed_at = timezone.now()
             survey.save()
         

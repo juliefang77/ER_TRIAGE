@@ -35,6 +35,7 @@ class AddToFollowupViewSet(viewsets.ModelViewSet):
                 patient=record.patient,
                 hospital=record.hospital,
                 triage_record=record,
+                patient_user=record.patient.patient_user if hasattr(record.patient, 'patient_user') else None, 
                 survey_status= 'default',
                 call_status='default'
             ) for record in triage_records

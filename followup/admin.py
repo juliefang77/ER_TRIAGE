@@ -5,7 +5,10 @@ from .models import (
     FollowupRecipient,
     FollowupSurvey,
     SurveyResponse,
-    FollowupNotetaking
+    FollowupNotetaking,
+    FollowupMessage,
+    MessageTemplate,
+    SurveyAi
 )
 
 @admin.register(StandardQuestion)
@@ -70,7 +73,7 @@ class SurveyTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(FollowupRecipient)
 class FollowupRecipientAdmin(admin.ModelAdmin):
-    list_display = ['patient_name', 'phone', 'research_patient', 'survey_status', 'call_status']
+    list_display = ['patient_name', 'patient_user', 'research_patient', 'survey_status', 'call_status', 'message_reply']
     list_filter = ['research_patient', 'survey_status', 'call_status']
     search_fields = ['phone', 'patient__name_patient']
 
@@ -116,10 +119,40 @@ class SurveyResponseAdmin(admin.ModelAdmin):
 
 @admin.register(FollowupNotetaking)
 class FollowupNotetakingAdmin(admin.ModelAdmin):
-    list_display = ['patient_name', 'created_by', 'created_at', 'raw_notes', 'processed_notes']
+    list_display = ['patient_name', 'patient', 'created_by', 'created_at', 'raw_notes', 'processed_notes', 'id']
     list_filter = ['created_at', 'hospital']
     search_fields = ['recipient__patient__name_patient', 'raw_notes']
     
     def patient_name(self, obj):
         return obj.recipient.patient.name_patient if obj.recipient and obj.recipient.patient else '-'
+    patient_name.short_description = '患者姓名'  # Column header in admin
+
+@admin.register(MessageTemplate)
+class MessageTemplateAdmin(admin.ModelAdmin):
+    list_display = ['id', 'template_name', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['template_name', 'content']
+
+
+@admin.register(FollowupMessage)
+class FollowupMessageAdmin(admin.ModelAdmin):
+    list_display = ['id', 'hospital', 'patient_name', 'template', 'sent_at', 'responded_at']
+    list_filter = ['hospital', 'sent_at']
+    search_fields = ['recipient__patient__name_patient', 'content']
+
+    def patient_name(self, obj):
+        return obj.recipient.patient.name_patient if obj.recipient and obj.recipient.patient else '-'
+    patient_name.short_description = '患者姓名'  # Column header in admin
+
+@admin.register(SurveyAi)
+class SurveyAiAdmin(admin.ModelAdmin):
+    list_display = ['analysis_name', 'patient_name', 'hospital', 'created_at', 'analysis_result', 'id']
+    list_filter = ['created_at', 'hospital']
+    search_fields = ['analysis_name', 'recipients__patient__name_patient']
+    
+    def patient_name(self, obj):
+        # Get all recipient names for this analysis
+        names = [r.patient.name_patient for r in obj.recipients.all() if r.patient]
+        # Join names with commas, or return '-' if no names
+        return ', '.join(names) if names else '-'
     patient_name.short_description = '患者姓名'  # Column header in admin

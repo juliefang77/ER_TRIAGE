@@ -7,7 +7,9 @@ StandardQuestionViewSet,
 SurveyTemplateViewSet, 
 SystemTemplateViewSet, 
 MassSendSurveyViewSet, 
-ManagementSurveyHistoryViewSet
+ManagementSurveyHistoryViewSet,
+MassSendMessageViewSet,
+SurveyTemplateSearchViewSet
 )
 
 router = DefaultRouter()
@@ -32,12 +34,14 @@ router.register(r'system-templates', SystemTemplateViewSet, basename='system-tem
 # 群发系统生成的surveys
 router.register(r'mass-survey', MassSendSurveyViewSet, basename='mass-survey')
 
- # urls.py
-router.register(
-    r'management-surveys-history', 
-    ManagementSurveyHistoryViewSet, 
-    basename='management-survey-history'  # Changed to unique basename
-)
+ # 查看已经填写的surveys
+router.register(r'management-surveys-history', ManagementSurveyHistoryViewSet, basename='management-survey-history' )
+
+# 群发前端传给Django content 的notification message
+router.register(r'mass-message', MassSendMessageViewSet, basename='mass-message')
+
+# 人工发送问卷页面，左上角“选择问卷模版” search function
+router.register(r'template-search', SurveyTemplateSearchViewSet, basename='template-search')
 
 urlpatterns = [
     path('', include(router.urls)),

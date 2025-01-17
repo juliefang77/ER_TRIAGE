@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import (
+from triage.models import (
     Patient, 
     TriageRecord, 
     TriageResult, 
@@ -188,3 +188,4 @@ class HospitalUserSerializer(serializers.ModelSerializer):
         validated_data['is_staff'] = False
         user = HospitalUser.objects.create_user(**validated_data)
         return user
+

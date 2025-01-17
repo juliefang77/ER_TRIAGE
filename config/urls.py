@@ -26,4 +26,5 @@ urlpatterns = [
     path('apipatient/', include('patient_portal.urls')),  # This will use patient_portal's URLs
     path('apichart/', include('triage_analytics.urls')),
     path('apifollowup/', include('followup.urls')),
+    path('ai/', include('ai_services.urls')),
 ]

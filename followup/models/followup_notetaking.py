@@ -9,6 +9,14 @@ class FollowupNotetaking(models.Model):
         blank=True,
         null=True
     )
+    patient = models.ForeignKey(  # Add this field
+        'triage.Patient',
+        on_delete=models.CASCADE,
+        verbose_name='患者',
+        null=True,
+        blank=True
+    )
+
     hospital = models.ForeignKey(
         'triage.HospitalUser',
         on_delete=models.CASCADE,
