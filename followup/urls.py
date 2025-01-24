@@ -9,14 +9,17 @@ SystemTemplateViewSet,
 MassSendSurveyViewSet, 
 ManagementSurveyHistoryViewSet,
 MassSendMessageViewSet,
-SurveyTemplateSearchViewSet
+SurveyTemplateSearchViewSet,
+SurveyEyeViewSet
 )
 
 router = DefaultRouter()
 
-# Register without the apifollowup prefix since it's handled in global urls.py
-router.register(
-    r'display', FollowupRecordDisplayViewSet, basename='saas-followup-display')
+# ai随访第一页，查看所有病人列表
+router.register(r'display', FollowupRecordDisplayViewSet, basename='saas-followup-display')
+
+# 第一页，小眼睛看surveys
+router.register(r'survey-eye', SurveyEyeViewSet, basename='survey-eye')
 
 # Select multiple patients, and add them to 随访计划
 router.register(

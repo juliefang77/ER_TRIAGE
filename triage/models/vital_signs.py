@@ -220,6 +220,12 @@ class VitalSigns(models.Model):
         default=0
     )
 
+    revised_trauma = models.IntegerField(
+        verbose_name='修订创伤评分（前端自动生成）',
+        null=True,
+        blank=True
+    )
+
     def __str__(self):
         if self.triage_record and self.triage_record.patient:
             return f"{self.triage_record.patient} 生命体征"
@@ -251,3 +257,4 @@ class VitalSigns(models.Model):
 # 20. rems_score | REMS评分 | IntegerField
 # 21. measurement_time | 测量时间 | DateTimeField
 # 22. mews_score | MEWS评分 | IntegerField
+# revised_trauma

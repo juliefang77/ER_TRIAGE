@@ -7,6 +7,7 @@ from .followup_notetaking import FollowupNotetaking
 from .followup_message import FollowupMessage
 from .message_template import MessageTemplate
 from .survey_ai import SurveyAi
+from .booking_online import BookingOnline
 
 __all__ = [
     'FollowupRecipient',
@@ -18,4 +19,5 @@ __all__ = [
     'FollowupMessage',
     'MessageTemplate',
     'SurveyAi',
+    'BookingOnline',
 ]

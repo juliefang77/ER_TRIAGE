@@ -1,7 +1,7 @@
 # patient_portal/models.py
 
 from django.db import models
-from triage.models import Hospital
+from triage.models import HospitalUser, Hospital
 
 class PatientTriageSubmission(models.Model):
     # Choice Definitions
@@ -100,7 +100,7 @@ class PatientTriageSubmission(models.Model):
 
     # Hospital Info
     hospital = models.ForeignKey(
-        Hospital,
+        HospitalUser,
         on_delete=models.SET_NULL,  # If hospital is deleted, set this field to NULL
         verbose_name='医院',
         null=True,

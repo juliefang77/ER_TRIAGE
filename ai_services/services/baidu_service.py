@@ -152,7 +152,7 @@ class BaiduAIService:
             print(f"Error logging API usage: {str(e)}")
 
 
-    def process_followup_notes(self, notetaking_obj):
+    def process_followup_notes_without_save(self, notetaking_obj):
         # Process followup notes using Baidu AI
         if not self.access_token:
             self.access_token = self._get_access_token()
@@ -162,6 +162,24 @@ class BaiduAIService:
         )
 
         # Make API call and process response
+        response = self._make_api_call(prompt)
+        processed_result = self._handle_response(response)
+
+        if processed_result:
+            return True, processed_result
+
+        return False, "Failed to process notes"
+
+    def process_followup_notes(self, notetaking_obj):
+        # Process followup notes using Baidu AI
+        if not self.access_token:
+            self.access_token = self._get_access_token()
+
+        prompt = BaiduAIConfig.NOTE_PROCESSING_PROMPT.format(
+            original_notes=notetaking_obj.raw_notes
+        )
+
+        # Make API call and process response  
         response = self._make_api_call(prompt)
         processed_result = self._handle_response(response)
 

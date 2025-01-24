@@ -1,9 +1,13 @@
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from triage.models import TriageRecord
-from ..models import FollowupRecipient, FollowupNotetaking
+from ..models import FollowupRecipient, FollowupNotetaking, FollowupSurvey
 from ..serializers.recorddisplay_serializer import FollowupTriageRecordSerializer
+from ..serializers.survey_serializer import ManagementSurveyDetailSerializer
 from django.db.models import Exists, OuterRef
 from followup.filters import FollowupMainFilter
 from django_filters import rest_framework as filters
@@ -49,3 +53,24 @@ class FollowupRecordDisplayViewSet(viewsets.ReadOnlyModelViewSet):
             has_note=Exists(notes_exists)  # Add new annotation
         )
 
+# 小眼睛看survey results
+class SurveyEyeViewSet(viewsets.ViewSet):
+    def retrieve(self, request, pk=None):
+        # pk will be the triage_record_id
+        try:
+            survey = FollowupSurvey.objects.select_related(
+                'recipient',
+                'template',
+                'response'
+            ).get(
+                recipient__triage_record_id=pk,
+                hospital=request.user,
+                recipient__survey_status='YES_RESPONSE'
+            )
+            serializer = ManagementSurveyDetailSerializer(survey)
+            return Response(serializer.data)
+        except FollowupSurvey.DoesNotExist:
+            return Response(
+                {'error': 'Survey not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )

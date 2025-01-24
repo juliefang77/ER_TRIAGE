@@ -71,11 +71,9 @@ class Patient(models.Model):
         ('Unknown', '未知'),
     ]
 
-    # Add UUID as primary key
-    id_system = models.UUIDField(
+    # Add ID as primary key
+    id_system = models.AutoField(
         primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
         verbose_name='唯一标识'
     )
 
@@ -286,7 +284,7 @@ class Patient(models.Model):
 
 
 # Fields:
-# 1. id_system | 唯一标识 | UUIDField (primary key)
+# 1. id_system | normal id
 # 2. id_his | HIS系统ID | CharField
 # 3. name_patient | 姓名 | CharField
 # 4. pinyin_name | 拼音姓名 | CharField

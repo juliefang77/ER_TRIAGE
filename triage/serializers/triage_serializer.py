@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from triage.models import (
+from ..models import (
     Patient, 
     TriageRecord, 
     TriageResult, 
@@ -74,64 +74,15 @@ class TriageHistoryInfoSerializer(serializers.ModelSerializer):
 
 # 新建分诊 API serializer 
 class TriageRecordSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer(required=False, allow_null=True)
-    nurse = MedicalStaffSerializer(required=False, allow_null=True)
-    result = TriageResultSerializer(required=False, allow_null=True)
-    vitalsigns = VitalSignsSerializer(required=False, allow_null=True)
-    history_info = TriageHistoryInfoSerializer(required=False, allow_null=True)
+    patient = PatientSerializer(required=False, allow_null=True, read_only=True)
+    nurse = MedicalStaffSerializer(required=False, allow_null=True, read_only=True)
+    result = TriageResultSerializer(required=False, allow_null=True, read_only=True)
+    vitalsigns = VitalSignsSerializer(required=False, allow_null=True, read_only=True)
+    history_info = TriageHistoryInfoSerializer(required=False, allow_null=True, read_only=True)
 
     class Meta:
         model = TriageRecord
         fields = '__all__'
-
-    def create(self, validated_data):
-        # Pop nested data
-        patient_data = validated_data.pop('patient', None)
-        vital_signs_data = validated_data.pop('vitalsigns', None)
-        result_data = validated_data.pop('result', None)
-        nurse_data = validated_data.pop('nurse', None)
-        submission_id = validated_data.pop('submission_id', None)
-
-        # Create the triage record first
-        triage_record = TriageRecord.objects.create(**validated_data)
-
-        # Create or update related objects if data exists
-        if patient_data:
-            id_number = patient_data.get('id_number')
-            if id_number:  # Only try to find existing patient if ID is provided
-                patient, _ = Patient.objects.get_or_create(
-                    id_number=id_number,
-                    defaults=patient_data
-                )
-            else:  # Always create new patient if no ID
-                patient = Patient.objects.create(**patient_data)
-            triage_record.patient = patient
-
-        if vital_signs_data:
-            vital_signs = VitalSigns.objects.create(
-                triage_record=triage_record,
-                **vital_signs_data
-            )
-
-        if result_data:
-            result = TriageResult.objects.create(
-                triage_record=triage_record,
-                **result_data
-            )
-
-        if nurse_data:
-            nurse, _ = MedicalStaff.objects.get_or_create(**nurse_data)
-            triage_record.nurse = nurse
-
-        # Update submission status if submission_id exists
-        if submission_id:
-            PatientTriageSubmission.objects.filter(
-                id=PatientTriageSubmission.submission_id,
-                hospital=validated_data.get('hospital')  # Get hospital from validated_data
-            ).update(status='APPROVED')
-
-        triage_record.save()
-        return triage_record
 
 # 分诊记录API
 class TriageHistorySerializer(serializers.ModelSerializer):

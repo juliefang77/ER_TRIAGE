@@ -51,7 +51,7 @@ class SurveyAnalysisService:
             'system': "你是一位在中国的医生，正在分析多位病人的随访问卷。请总结他们的恢复情况，指出需要特别关注的问题，并提出后续随访建议。",
             'stream': False,
             'stop': ["结束", "完成"],
-            'max_output_tokens': 300,  # Increased for multiple surveys
+            'max_output_tokens': 800,  # Increased for multiple surveys
             'frequency_penalty': 0.3,
             'presence_penalty': 0.1,
             'metadata': {
@@ -73,23 +73,9 @@ class SurveyAnalysisService:
             print(f"Error making API call: {str(e)}")
             return None
 
-    def _format_messages(self, prompt):
-        """Format prompt into proper message structure"""
-        return {
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "temperature": 0.7,
-            "top_p": 0.8,
-            "penalty_score": 1.2,
-            "stream": False
-        }
 
     def _handle_response(self, response):
-        """Handle the API response and extract relevant information"""
+        # """Handle the API response and extract relevant information"""
         try:
             if not response:
                 raise ValueError("No response received")

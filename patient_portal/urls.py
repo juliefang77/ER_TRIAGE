@@ -6,7 +6,8 @@ from .views import (
     PendingSubmissionViewSet,
     PendingSubmissionDataViewSet,
     PatientSurveyViewSet,
-    PatientMessageViewSet
+    PatientMessageViewSet,
+    BookingViewSet
 )
 # Authentication
 from django.urls import path
@@ -27,6 +28,9 @@ router.register(r'surveys', PatientSurveyViewSet, basename='patient-surveys')
 
 # APP API: Patient gets messages
 router.register(r'messages', PatientMessageViewSet, basename='patient-messages')
+
+# APP API: Patient makes booking
+router.register(r'bookings', BookingViewSet, basename='patient-bookings')
 
 urlpatterns = [
     path('', include(router.urls)),

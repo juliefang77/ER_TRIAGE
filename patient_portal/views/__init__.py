@@ -3,6 +3,7 @@ from .hospital import PendingSubmissionViewSet, PendingSubmissionDataViewSet
 from .auth import register, verify_registration, login
 from .survey import PatientSurveyViewSet
 from .message import PatientMessageViewSet
+from .booking import BookingViewSet
 
 __all__ = [
     'PatientTriageSubmissionViewSet',
@@ -13,4 +14,5 @@ __all__ = [
     'login',
     'PatientSurveyViewSet',
     'PatientMessageViewSet',
+    'BookingViewSet',
 ]

@@ -8,7 +8,8 @@ from .models import (
     FollowupNotetaking,
     FollowupMessage,
     MessageTemplate,
-    SurveyAi
+    SurveyAi,
+    BookingOnline
 )
 
 @admin.register(StandardQuestion)
@@ -156,3 +157,48 @@ class SurveyAiAdmin(admin.ModelAdmin):
         # Join names with commas, or return '-' if no names
         return ', '.join(names) if names else '-'
     patient_name.short_description = '患者姓名'  # Column header in admin
+
+@admin.register(BookingOnline)
+class BookingOnlineAdmin(admin.ModelAdmin):
+    list_display = [
+        'id', 
+        'patient_name',
+        'hospital',
+        'start_time',
+        'end_time',
+        'status',
+        'created_at',
+        'qr_code',
+        'terminal_trace'
+    ]
+    
+    list_filter = [
+        ('start_time', admin.DateFieldListFilter),
+        ('end_time', admin.DateFieldListFilter),
+        ('created_at', admin.DateFieldListFilter),
+        'hospital',
+        'status'
+    ]
+    
+    search_fields = [
+        'patient__name_patient',    # Changed to reference Patient model
+        'payment_id'
+    ]
+
+    def patient_name(self, obj):
+        return obj.patient.name_patient if obj.patient else '-'  # Changed to use patient instead of patient_user
+    patient_name.short_description = '患者姓名'
+
+    raw_id_fields = ['patient', 'hospital']  # Removed patient_user
+
+    fieldsets = (
+        ('患者信息', {
+            'fields': ('patient',)  # Removed patient_user
+        }),
+        ('预约信息', {
+            'fields': ('hospital', 'start_time', 'end_time')
+        }),
+        ('状态信息', {
+            'fields': ('status', 'payment_id')
+        })
+    )

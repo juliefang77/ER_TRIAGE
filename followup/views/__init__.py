@@ -1,4 +1,4 @@
-from .api_display import FollowupRecordDisplayViewSet
+from .api_display import FollowupRecordDisplayViewSet, SurveyEyeViewSet
 from .api_addrecipient import AddToFollowupViewSet
 from .api_survey import (
     StandardQuestionViewSet, 
@@ -19,5 +19,6 @@ __all__ = [
     'MassSendSurveyViewSet',
     'ManagementSurveyHistoryViewSet',
     'MassSendMessageViewSet',
-    'SurveyTemplateSearchViewSet'
+    'SurveyTemplateSearchViewSet',
+    'SurveyEyeViewSet',
 ]

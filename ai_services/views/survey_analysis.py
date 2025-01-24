@@ -3,13 +3,22 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from ..services.baidu_survey import SurveyAnalysisService
-from followup.models import FollowupRecipient, FollowupSurvey
+from followup.models import FollowupRecipient, FollowupSurvey, SurveyAi
 # Serializers
 from ..serializers.survey_serializer import SurveyAnalysisListSerializer, SurveyAiSerializer
 from followup.serializers.survey_serializer import ManagementSurveyDetailSerializer
 # Filters
 from followup.filters import AiSurveyRecipientFilter
 from django_filters.rest_framework import DjangoFilterBackend
+
+class SurveyAnalysisListViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = SurveyAiSerializer
+    
+    def get_queryset(self):
+        # Filter queryset to only show analyses for the current hospital
+        return SurveyAi.objects.filter(
+            hospital=self.request.user
+        ).order_by('-created_at')
 
 class SurveyAnalysisViewSet(viewsets.ViewSet):
     filter_backends = [DjangoFilterBackend]
