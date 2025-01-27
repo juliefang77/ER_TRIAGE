@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from ..services.baidu_survey import SurveyAnalysisService
 from followup.models import FollowupRecipient, FollowupSurvey, SurveyAi
 # Serializers
-from ..serializers.survey_serializer import SurveyAnalysisListSerializer, SurveyAiSerializer
+from ..serializers.survey_serializer import SurveyAnalysisListSerializer, SurveyAiSerializer, SurveyLLMAnalysisSerializer
 from followup.serializers.survey_serializer import ManagementSurveyDetailSerializer
 # Filters
 from followup.filters import AiSurveyRecipientFilter
@@ -17,7 +17,7 @@ class SurveyAnalysisListViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         # Filter queryset to only show analyses for the current hospital
         return SurveyAi.objects.filter(
-            hospital=self.request.user
+            hospital=self.request.user.hospital
         ).order_by('-created_at')
 
 class SurveyAnalysisViewSet(viewsets.ViewSet):
@@ -28,7 +28,7 @@ class SurveyAnalysisViewSet(viewsets.ViewSet):
         # Get completed surveys with related data
         completed_recipients = FollowupRecipient.objects.filter(
             survey_status='YES_RESPONSE',
-            hospital=request.user
+            hospital=request.user.hospital
         ).select_related(
             'triage_record', 
             'triage_record__result',  
@@ -50,7 +50,7 @@ class SurveyAnalysisViewSet(viewsets.ViewSet):
     def survey_detail(self, request, pk=None):
         # Get the specific recipient's survey details
         recipient = get_object_or_404(
-            FollowupRecipient.objects.filter(hospital=request.user), 
+            FollowupRecipient.objects.filter(hospital=request.user.hospital), 
             pk=pk
         )
         
@@ -86,7 +86,7 @@ class SurveyAnalysisViewSet(viewsets.ViewSet):
         # Filter by hospital at the ViewSet level
         valid_recipient_ids = FollowupRecipient.objects.filter(
             id__in=recipient_ids,
-            hospital=request.user
+            hospital=request.user.hospital
         ).values_list('id', flat=True)
     
         service = SurveyAnalysisService()
@@ -117,7 +117,7 @@ class SurveyAnalysisViewSet(viewsets.ViewSet):
             analysis_result=analysis_result,
             recipient_ids=recipient_ids,
             analysis_name=analysis_name,
-            hospital=request.user
+            hospital=request.user.hospital
         )
         
         if success:

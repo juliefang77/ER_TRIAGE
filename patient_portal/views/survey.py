@@ -10,8 +10,9 @@ from followup.models import FollowupSurvey, SurveyResponse
 
 # Import serializers (you'll need to create these in patient_portal)
 from patient_portal.serializers.survey_serializer import (
-    PatientSurveySerializer,
-    SurveyResponseSerializer
+    PatientSurveyListSerializer,
+    SurveyResponseSerializer,
+    PatientSurveySerializer
 )
 from rest_framework.permissions import AllowAny
 
@@ -68,4 +69,25 @@ class PatientSurveyViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(
             response_serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
+        )
+    
+# APP API: Simply survey list view light API
+class PatientSurveyListViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [AllowAny]
+    authentication_classes = []  # No authentication required
+    serializer_class = PatientSurveyListSerializer
+
+    def get_queryset(self):
+        # Get phone from request params
+        phone = self.request.query_params.get('phone')
+        if not phone:
+            return FollowupSurvey.objects.none()
+
+        return FollowupSurvey.objects.filter(
+            recipient__patient__patient_user__phone=phone,
+            # recipient__survey_status='NO_RESPONSE'
+        ).select_related(
+            'template', 
+            'hospital', 
+            'recipient'
         )

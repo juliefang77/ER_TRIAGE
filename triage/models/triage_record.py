@@ -2,6 +2,7 @@ from django.db import models
 from .patient import Patient
 from .medical_staff import MedicalStaff
 from django.utils import timezone 
+from .mass_injury import MassInjury
 
 class TriageRecord(models.Model):
 
@@ -80,7 +81,7 @@ class TriageRecord(models.Model):
     )
 
     hospital = models.ForeignKey(
-        'HospitalUser',
+        'Hospital',
         on_delete=models.PROTECT,
         related_name='triage_records',  # Added related_name
         verbose_name='所属医院',
@@ -95,10 +96,8 @@ class TriageRecord(models.Model):
         verbose_name='登记时间'
     )
     
-    nurse = models.ForeignKey(
-        MedicalStaff, 
-        on_delete=models.PROTECT, 
-        related_name='triage_records', 
+    nurse = models.CharField(
+        max_length=50,  # Adjust length as needed
         verbose_name='分诊护士',
         null=True,
         blank=True
@@ -179,7 +178,14 @@ class TriageRecord(models.Model):
         blank=True
     )
 
-
+    mass_event = models.ForeignKey(
+        'MassInjury',  
+        verbose_name='群伤事件',
+        on_delete=models.SET_NULL,  # If mass injury record is deleted, keep triage record
+        null=True,
+        blank=True,
+        related_name='triage_records'  # Access from MassInjury model
+    )
 
     def __str__(self):
         patient_str = self.patient if self.patient else "未知患者"
@@ -206,3 +212,4 @@ class TriageRecord(models.Model):
 # 12. surgery_type | 手术 | CharField (choices)
 # 13. ifmass_injury | 是否群伤 | CharField (choices)
 # 14 chief_symptom | 快捷分诊 ｜ CharField (choices)
+# mass_event 

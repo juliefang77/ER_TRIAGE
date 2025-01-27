@@ -7,6 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from triage.models import TriageRecord
 from ..models import FollowupRecipient
 
+# Not used
 class AddToFollowupViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -24,7 +25,7 @@ class AddToFollowupViewSet(viewsets.ModelViewSet):
         # Get triage records that don't already have followup recipients
         triage_records = TriageRecord.objects.filter(
             id__in=triage_record_ids,
-            hospital=self.request.user
+            hospital=self.request.user.hospital
         ).exclude(
             recipient__isnull=False
         )

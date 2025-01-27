@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
+# First, create a new serializer for the message-patient pair
+class MessageRecipientSerializer(serializers.Serializer):
+    triage_record_id = serializers.IntegerField()
+    content = serializers.CharField()
+
 class MassSendMessageSerializer(serializers.Serializer):
-    triage_record_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        required=True
-    )
-    content = serializers.CharField(required=True)
+    messages = MessageRecipientSerializer(many=True)

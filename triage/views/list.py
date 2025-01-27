@@ -25,11 +25,10 @@ class TriageHistoryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return TriageRecord.objects.select_related(
             'patient',
-            'nurse',
             'result',
             'vitalsigns',
             'history_info'
-        ).filter(hospital=self.request.user)  # Keep only the security filter
+        ).filter(hospital=self.request.user.hospital)  # Keep only the security filter
         
 
 class SaaSMedicalStaffViewSet(viewsets.ModelViewSet):
@@ -51,7 +50,8 @@ class TriageHistoryListViewSet(viewsets.ReadOnlyModelViewSet):
         return TriageRecord.objects.select_related(
             'patient',
             'result',
-            'vitalsigns'
+            'vitalsigns',
+            'history_info'
         ).only(
             # TriageRecord fields
             'id',
@@ -73,5 +73,10 @@ class TriageHistoryListViewSet(viewsets.ReadOnlyModelViewSet):
             # VitalSigns fields
             'vitalsigns__id',
             'vitalsigns__injury_type',
-            'vitalsigns__injury_position'
-        ).filter(hospital=self.request.user)
+            'vitalsigns__injury_position',
+            # HistoryInfo fields
+            'history_info__id',
+            'history_info__guahao_status',
+            'history_info__departure_time',
+            'history_info__stay_duration'
+        ).filter(hospital=self.request.user.hospital)

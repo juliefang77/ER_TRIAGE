@@ -15,7 +15,7 @@ class MedicalStaff(models.Model):
         verbose_name='唯一标识'
     )
     hospital = models.ForeignKey(
-        'HospitalUser',
+        'Hospital',
         on_delete=models.CASCADE,
         related_name='staff',
         null=True, # Nullable for now

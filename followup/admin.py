@@ -158,47 +158,13 @@ class SurveyAiAdmin(admin.ModelAdmin):
         return ', '.join(names) if names else '-'
     patient_name.short_description = '患者姓名'  # Column header in admin
 
+
 @admin.register(BookingOnline)
 class BookingOnlineAdmin(admin.ModelAdmin):
-    list_display = [
-        'id', 
-        'patient_name',
-        'hospital',
-        'start_time',
-        'end_time',
-        'status',
-        'created_at',
-        'qr_code',
-        'terminal_trace'
-    ]
-    
-    list_filter = [
-        ('start_time', admin.DateFieldListFilter),
-        ('end_time', admin.DateFieldListFilter),
-        ('created_at', admin.DateFieldListFilter),
-        'hospital',
-        'status'
-    ]
-    
-    search_fields = [
-        'patient__name_patient',    # Changed to reference Patient model
-        'payment_id'
-    ]
+    list_display = ['id', 'get_patient_name', 'hospital', 'start_time', 'end_time', 'status']
+    search_fields = ['patient_user__first_name', 'hospital__name']  # Update search fields
+    list_filter = ['status']
 
-    def patient_name(self, obj):
-        return obj.patient.name_patient if obj.patient else '-'  # Changed to use patient instead of patient_user
-    patient_name.short_description = '患者姓名'
-
-    raw_id_fields = ['patient', 'hospital']  # Removed patient_user
-
-    fieldsets = (
-        ('患者信息', {
-            'fields': ('patient',)  # Removed patient_user
-        }),
-        ('预约信息', {
-            'fields': ('hospital', 'start_time', 'end_time')
-        }),
-        ('状态信息', {
-            'fields': ('status', 'payment_id')
-        })
-    )
+    def get_patient_name(self, obj):
+        return obj.patient_user.first_name if obj.patient_user else '-'
+    get_patient_name.short_description = '患者姓名'  # Chinese label for the column

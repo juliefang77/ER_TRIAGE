@@ -26,7 +26,7 @@ class BookingOnline(models.Model):
     )
 
     hospital = models.ForeignKey(
-        'triage.HospitalUser',
+        'triage.Hospital',
         on_delete=models.SET_NULL,
         verbose_name='接单医院',
         null=True,

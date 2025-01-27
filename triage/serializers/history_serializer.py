@@ -4,7 +4,6 @@ from triage.models import (
     TriageRecord, 
     TriageResult, 
     VitalSigns, 
-    MedicalStaff, 
     Hospital, 
     HospitalUser, 
     TriageHistoryInfo
@@ -18,7 +17,7 @@ class PatientListSerializer(serializers.ModelSerializer):
 class ResultListSerializer(serializers.ModelSerializer):
     class Meta:
         model = TriageResult
-        fields = ['id', 'priority_level', 'treatment_area', 'triage_status']  
+        fields = ['id', 'priority_level', 'treatment_area', 'triage_status', 'department', 'patient_nextstep']  
 
 class VitalListSerializer(serializers.ModelSerializer):
     injury_position = serializers.ListField(
@@ -36,10 +35,22 @@ class VitalListSerializer(serializers.ModelSerializer):
             'injury_position'
         ]
 
+class HistoryInfoListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TriageHistoryInfo
+        fields = [
+            'id',
+            'guahao_status',
+            'edit_triage',
+            'departure_time',
+            'stay_duration'
+        ]
+
 class TriageHistoryListSerializer(serializers.ModelSerializer):
     patient = PatientListSerializer(read_only=True)
     result = ResultListSerializer(read_only=True)
     vitalsigns = VitalListSerializer(read_only=True)
+    history_info = HistoryInfoListSerializer(read_only=True)
 
     class Meta:
         model = TriageRecord
@@ -49,7 +60,11 @@ class TriageHistoryListSerializer(serializers.ModelSerializer):
             'patient',
             'result',
             'vitalsigns',
+            'history_info',
             'chief_complaint',
-            'chief_symptom'
+            'chief_symptom',
+            'nurse',
+            'speed_channel',
+            'specialty_type'
         ]
 

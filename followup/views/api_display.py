@@ -31,23 +31,23 @@ class FollowupRecordDisplayViewSet(viewsets.ReadOnlyModelViewSet):
         # Create subquery for followup check
         followup_exists = FollowupRecipient.objects.filter(
             triage_record=OuterRef('pk'),
-            hospital=self.request.user  # Filter by hospital
+            hospital=self.request.user.hospital  # Filter by hospital
         )
 
         # Create subquery for notes check
         notes_exists = FollowupNotetaking.objects.filter(
             patient=OuterRef('patient'),
-            hospital=self.request.user  # Filter by hospital
+            hospital=self.request.user.hospital  # Filter by hospital
         )
 
         return TriageRecord.objects.filter(
-            hospital=self.request.user
+            hospital=self.request.user.hospital
         ).select_related(
             'patient',
-            'nurse',
             'hospital',
             'recipient',
-            'result'
+            'result',
+            'vitalsigns'
         ).annotate(
             has_followup=Exists(followup_exists),
             has_note=Exists(notes_exists)  # Add new annotation
@@ -64,7 +64,7 @@ class SurveyEyeViewSet(viewsets.ViewSet):
                 'response'
             ).get(
                 recipient__triage_record_id=pk,
-                hospital=request.user,
+                hospital=request.user.hospital,
                 recipient__survey_status='YES_RESPONSE'
             )
             serializer = ManagementSurveyDetailSerializer(survey)

@@ -5,7 +5,7 @@ from django.utils import timezone
 class SurveyResponse(models.Model):
 
     hospital = models.ForeignKey(
-        'triage.HospitalUser',
+        'triage.Hospital',
         on_delete=models.CASCADE,
         verbose_name='医院',
         null=True,

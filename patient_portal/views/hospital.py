@@ -19,7 +19,7 @@ class PendingSubmissionViewSet(viewsets.ReadOnlyModelViewSet):  # Changed to Rea
     
     def get_queryset(self):
         return PatientTriageSubmission.objects.filter(
-            hospital=self.request.user,
+            hospital=self.request.user.hospital,
             status='PENDING'
         )
 
@@ -33,7 +33,7 @@ class PendingSubmissionDataViewSet(viewsets.ViewSet):  # Changed to ViewSet
         try:
             submission = PatientTriageSubmission.objects.get(
                 id=pk,
-                hospital=request.user
+                hospital=request.user.hospital
             )
             serializer = self.serializer_class(submission)
             return Response(serializer.data)
@@ -45,6 +45,6 @@ class PendingSubmissionDataViewSet(viewsets.ViewSet):  # Changed to ViewSet
 
     def get_queryset(self):
         return PatientTriageSubmission.objects.filter(
-            hospital=self.request.user,
+            hospital=self.request.user.hospital,
             status='PENDING'
         )

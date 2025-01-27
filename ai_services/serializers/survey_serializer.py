@@ -48,6 +48,7 @@ class SurveyAnalysisListSerializer(serializers.ModelSerializer):
             'call_status'
         ]
 
+# NOT USED NOW
 # Page AI analyze survey: 这个serializer的内容用于input给百度API，来做批量分析
 class SurveyLLMAnalysisSerializer(serializers.ModelSerializer):
     patient_info = serializers.SerializerMethodField()

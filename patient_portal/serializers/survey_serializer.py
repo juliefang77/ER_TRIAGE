@@ -76,20 +76,39 @@ class PatientSurveyTemplateSerializer(serializers.ModelSerializer):
     def get_question_8_details(self, obj):
         return self.get_question_details(obj.question_8)
 
+# Display received survey details 
 class PatientSurveySerializer(serializers.ModelSerializer):
     template = PatientSurveyTemplateSerializer() # remove source = template
     survey_status = serializers.CharField(source='recipient.survey_status', read_only=True)
+    hospital_name = serializers.CharField(source='hospital.name', read_only=True)
     
     class Meta:
         model = FollowupSurvey
         fields = [
             'id',
+            'hospital_name',
             'template',
             'survey_status',
             'created_at',
             'completed_at'
         ]
         read_only_fields = ['status', 'created_at', 'completed_at']
+
+# Create a simple serializer for list view
+class PatientSurveyListSerializer(serializers.ModelSerializer):
+    survey_status = serializers.CharField(source='recipient.survey_status', read_only=True)
+    hospital_name = serializers.CharField(source='hospital.name', read_only=True)
+    survey_name = serializers.CharField(source='template.survey_name', read_only=True)
+    
+    class Meta:
+        model = FollowupSurvey
+        fields = [
+            'id',
+            'hospital_name',
+            'survey_name',
+            'survey_status',
+            'created_at'
+        ]
 
 class SurveyResponseSerializer(serializers.ModelSerializer):
     class Meta:

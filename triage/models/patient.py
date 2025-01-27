@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 import re
-import uuid
 
 class Patient(models.Model):
     
@@ -85,6 +84,15 @@ class Patient(models.Model):
         related_name='patients'  # Now one user can have multiple patients
     )
 
+    hospital = models.ForeignKey(
+        'Hospital',
+        on_delete=models.PROTECT,
+        related_name='patients',
+        verbose_name='所属医院',
+        null=True,
+        blank=True
+    )
+
     # used for integrating with other HIS softwares
     id_his = models.CharField(
         max_length=50,
@@ -95,7 +103,7 @@ class Patient(models.Model):
     
     # Add hospital relationship
     hospital = models.ForeignKey(
-        'HospitalUser',
+        'Hospital',
         on_delete=models.CASCADE,
         related_name='patients',
         verbose_name='所属医院',
@@ -309,3 +317,4 @@ class Patient(models.Model):
 # 23. patient_type | 身份标识 | CharField (choices: "THREE_NO", "LOW_INCOME", "SPECIAL_POVERTY", "CARD_POVERTY", "FIVE_GUARANTEE", "MILITARY_8023", "ACTIVE_MILITARY", "RETIRED_MILITARY", "ORPHANED")
 # 24. allergies | 过敏史 | TextField
 # patient_user | onetoone to PatientUser in patient_portal app
+# hospital | foreign key Hospital

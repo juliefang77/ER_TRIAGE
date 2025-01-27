@@ -63,9 +63,6 @@ class VitalSignsSerializer(serializers.ModelSerializer):
 
 # Feed into 分诊记录 API
 class TriageHistoryInfoSerializer(serializers.ModelSerializer):
-    # All fields editable except stay_duration
-    assigned_doctor = MedicalStaffSerializer(required=False, allow_null=True)
-    assigned_nurse = MedicalStaffSerializer(required=False, allow_null=True)
 
     class Meta:
         model = TriageHistoryInfo
@@ -75,7 +72,6 @@ class TriageHistoryInfoSerializer(serializers.ModelSerializer):
 # 新建分诊 API serializer 
 class TriageRecordSerializer(serializers.ModelSerializer):
     patient = PatientSerializer(required=False, allow_null=True, read_only=True)
-    nurse = MedicalStaffSerializer(required=False, allow_null=True, read_only=True)
     result = TriageResultSerializer(required=False, allow_null=True, read_only=True)
     vitalsigns = VitalSignsSerializer(required=False, allow_null=True, read_only=True)
     history_info = TriageHistoryInfoSerializer(required=False, allow_null=True, read_only=True)
@@ -84,10 +80,9 @@ class TriageRecordSerializer(serializers.ModelSerializer):
         model = TriageRecord
         fields = '__all__'
 
-# 分诊记录API
+# 分诊记录API CRUD
 class TriageHistorySerializer(serializers.ModelSerializer):
     patient = PatientSerializer(required=False, allow_null=True)
-    nurse = MedicalStaffSerializer(required=False, allow_null=True)
     result = TriageResultSerializer(required=False, allow_null=True)
     vitalsigns = VitalSignsSerializer(required=False, allow_null=True)
     history_info = TriageHistoryInfoSerializer(required=False, allow_null=True)
@@ -95,6 +90,44 @@ class TriageHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TriageRecord
         fields = '__all__'
+    
+    def update(self, instance, validated_data):
+        # Handle nested updates
+        patient_data = validated_data.pop('patient', None)
+        result_data = validated_data.pop('result', None)
+        vitalsigns_data = validated_data.pop('vitalsigns', None)
+        history_info_data = validated_data.pop('history_info', None)
+
+        # Update main instance fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update patient if data provided
+        if patient_data and instance.patient:
+            for attr, value in patient_data.items():
+                setattr(instance.patient, attr, value)
+            instance.patient.save()
+
+        # Update result if data provided
+        if result_data and instance.result:
+            for attr, value in result_data.items():
+                setattr(instance.result, attr, value)
+            instance.result.save()
+
+        # Update vitalsigns if data provided
+        if vitalsigns_data and instance.vitalsigns:
+            for attr, value in vitalsigns_data.items():
+                setattr(instance.vitalsigns, attr, value)
+            instance.vitalsigns.save()
+
+        # Update history_info if data provided
+        if history_info_data and instance.history_info:
+            for attr, value in history_info_data.items():
+                setattr(instance.history_info, attr, value)
+            instance.history_info.save()
+
+        return instance
 
 #Authentication Serializers
 class HospitalLoginSerializer(serializers.Serializer):

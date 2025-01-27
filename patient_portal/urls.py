@@ -7,7 +7,9 @@ from .views import (
     PendingSubmissionDataViewSet,
     PatientSurveyViewSet,
     PatientMessageViewSet,
-    BookingViewSet
+    BookingViewSet,
+    HospitalBookingViewSet,
+    PatientSurveyListViewSet
 )
 # Authentication
 from django.urls import path
@@ -23,14 +25,20 @@ router.register(r'pendingsubmissions', PendingSubmissionViewSet, basename='pendi
 # SaaS API: get submission data for auto fill: apipatient/autofilltriage/{patient id, which you get from previous API}
 router.register(r'autofilltriage', PendingSubmissionDataViewSet, basename='autofill-triage')  
 
-# APP API: Patient gets survey 
+# APP API: Patient gets survey list (light API)
+router.register(r'patient-surveys-list', PatientSurveyListViewSet, basename='patient-surveys-list')
+
+# APP API: Patient gets survey (detail view & submission)
 router.register(r'surveys', PatientSurveyViewSet, basename='patient-surveys')
 
 # APP API: Patient gets messages
 router.register(r'messages', PatientMessageViewSet, basename='patient-messages')
 
-# APP API: Patient makes booking
+# APP API: Patient makes booking and views bookings
 router.register(r'bookings', BookingViewSet, basename='patient-bookings')
+
+# SaaS API: Hospital views bookings list 
+router.register(r'hospital-bookings', HospitalBookingViewSet, basename='hospital-booking')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -6,6 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from followup.serializers.message_serializer import MassSendMessageSerializer
 from followup.models import FollowupMessage, FollowupRecipient
 from triage.models import TriageRecord
+from django.db import transaction
+from rest_framework import serializers
+
 
 class MassSendMessageViewSet(viewsets.ViewSet):
     """ViewSet for mass sending messages to patients"""
@@ -15,42 +18,57 @@ class MassSendMessageViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['post'])
     def send(self, request):
-        """Send customized message to selected patients"""
+        """Send different messages to different patients"""
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        triage_record_ids = serializer.validated_data['triage_record_ids']
-        content = serializer.validated_data['content']
+        messages_data = serializer.validated_data['messages']
+        
+        try:
+            with transaction.atomic():  # Use transaction to ensure all operations succeed or none do
+                messages_created = []
+                for message_data in messages_data:
+                    record_id = message_data['triage_record_id']
+                    content = message_data['content']
 
-        messages_created = []
-        for record_id in triage_record_ids:
-            # Get or create recipient
-            recipient, _ = FollowupRecipient.objects.get_or_create(
-                triage_record_id=record_id,
-                hospital=request.user,
-                defaults={
-                    'patient': TriageRecord.objects.get(id=record_id).patient,
-                    'patient_user': TriageRecord.objects.get(id=record_id).patient.patient_user
-                }
-            )
+                    # Get or create recipient
+                    try:
+                        triage_record = TriageRecord.objects.get(id=record_id)
+                        recipient, _ = FollowupRecipient.objects.get_or_create(
+                            triage_record_id=record_id,
+                            hospital=request.user.hospital,
+                            defaults={
+                                'patient': triage_record.patient,
+                                'patient_user': triage_record.patient.patient_user
+                            }
+                        )
 
-            # Create message record
-            message = FollowupMessage.objects.create(
-                hospital=request.user,
-                recipient=recipient,
-                content=content
-            )
-            messages_created.append(message)
+                        # Create message record
+                        message = FollowupMessage.objects.create(
+                            hospital=request.user.hospital,
+                            recipient=recipient,
+                            content=content
+                        )
+                        messages_created.append(message)
 
-            # Update recipient status
-            recipient.message_reply = 'SENT'
-            recipient.save()
+                        # Update recipient status
+                        recipient.message_reply = 'SENT'
+                        recipient.save()
 
-            # TODO: Send app notification to patient_user if exists
-            # This would integrate with your notification system
+                        # TODO: Send app notification to patient_user if exists
 
-        return Response({
-            "message": f"Successfully sent message to {len(messages_created)} patients",
-            "messages_created": len(messages_created)
-        }, status=status.HTTP_201_CREATED)
+                    except TriageRecord.DoesNotExist:
+                        raise serializers.ValidationError(
+                            f"Triage record with id {record_id} does not exist"
+                        )
+
+                return Response({
+                    "message": f"Successfully sent {len(messages_created)} messages",
+                    "messages_created": len(messages_created)
+                }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({
+                "error": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)

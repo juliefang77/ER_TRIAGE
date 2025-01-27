@@ -71,7 +71,7 @@ class TriageResult(models.Model):
 
     triage_record = models.OneToOneField(
         TriageRecord,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name='result',
         null=True,
         blank=True
@@ -109,7 +109,7 @@ class TriageResult(models.Model):
     )
 
     treatment_area = models.CharField(
-        max_length=5,
+        max_length=50,
         choices=TREATMENT_AREAS,
         verbose_name='就诊区域',
         null=True,

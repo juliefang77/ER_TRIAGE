@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.contrib.auth.admin import UserAdmin
-from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser, TriageHistoryInfo
+from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser, TriageHistoryInfo, MassInjury
 
 class VitalSignsInline(admin.StackedInline):
     model = VitalSigns
@@ -139,7 +139,7 @@ class TriageRecordAdmin(admin.ModelAdmin):
         'hospital'
     ]
     search_fields = ['patient__name_patient', 'patient__id_number', 'chief_complaint']
-    raw_id_fields = ['patient', 'nurse']
+    raw_id_fields = ['patient']
     inlines = [VitalSignsInline, TriageResultInline]
     
     fieldsets = [
@@ -163,7 +163,8 @@ class TriageRecordAdmin(admin.ModelAdmin):
                 'specialty_type',
                 'other_inquiry',
                 'surgery_type',
-                'ifmass_injury'
+                'ifmass_injury',
+                'mass_event'
             ]
         }),
         ('病情描述', {
@@ -255,35 +256,19 @@ class HospitalUserAdmin(UserAdmin):
 
 @admin.register(TriageHistoryInfo)
 class TriageHistoryInfoAdmin(admin.ModelAdmin):
-    list_display = ('triage_record', 'assigned_doctor', 'assigned_nurse', 'departure_time')
+    list_display = ['id', 'get_patient_name', 'guahao_status', 'departure_time', 'stay_duration']
+    list_filter = ['guahao_status']
+    raw_id_fields = ['triage_record']  # Use raw_id_fields for ForeignKey
     
-    fieldsets = [
-        ('基本信息', {
-            'fields': [
-                'triage_record',
-                'guahao_status',
-                'edit_triage',
-            ]
-        }),
-        ('时间信息', {
-            'fields': [
-                'departure_time',
-                'stay_duration',
-            ]
-        }),
-        ('医护人员', {
-            'fields': [
-                'assigned_doctor',
-                'assigned_nurse',
-            ]
-        })
-    ]
+    def get_patient_name(self, obj):
+        return obj.triage_record.patient.name_patient if obj.triage_record and obj.triage_record.patient else ''
+    get_patient_name.short_description = '患者姓名'
 
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        form.base_fields['assigned_doctor'].queryset = MedicalStaff.objects.filter(role='DOC')
-        form.base_fields['assigned_nurse'].queryset = MedicalStaff.objects.filter(role='NUR')
-        return form
+@admin.register(MassInjury)
+class MassInjuryAdmin(admin.ModelAdmin):
+    list_display = ['mass_name', 'mass_type', 'mass_time', 'mass_number']
+    list_filter = ['mass_type']
+    search_fields = ['mass_name', 'mass_notes']
 
 # Register all models
 admin.site.register(Patient, PatientAdmin)

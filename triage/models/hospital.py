@@ -1,13 +1,6 @@
 from django.db import models
-import uuid
 
 class Hospital(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-        verbose_name='唯一标识'
-    )
     
     name = models.CharField(
         max_length=200,

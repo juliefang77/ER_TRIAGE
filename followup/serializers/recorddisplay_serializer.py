@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from triage.models import TriageRecord, VitalSigns, Patient, TriageResult
+from triage.models import TriageRecord, VitalSigns, Patient, TriageResult, Hospital
 from triage.serializers.triage_serializer import HospitalUserFilterSerializer
 from followup.models import FollowupRecipient
 
@@ -34,23 +34,26 @@ class SimpleResultSerializer(serializers.ModelSerializer):
         model = TriageResult
         fields = ['id', 'priority_level', 'department']
 
+class SimpleHospitalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hospital
+        fields = ['id', 'name']
 
 class FollowupTriageRecordSerializer(serializers.ModelSerializer):
     patient = SimplePatientSerializer(required=False, allow_null=True)
-    # nurse = MedicalStaffSerializer(required=False, allow_null=True)
-    hospital = HospitalUserFilterSerializer(required=False, allow_null=True)
     recipient = FollowupRecipientSerializer(required=False, allow_null=True)
     result = SimpleResultSerializer(required=False, allow_null=True) 
     vitalsigns = InjurySerializer(required=False, allow_null=True)
+    hospital = SimpleHospitalSerializer(read_only=True)  
+
     has_followup = serializers.BooleanField(read_only=True)
-    has_note = serializers.BooleanField(read_only=True)  # Add new field
+    has_note = serializers.BooleanField(read_only=True) 
 
     class Meta:
         model = TriageRecord
         fields = [
             'id',
             'patient',
-            'nurse',
             'hospital',
             'recipient',
             'result',

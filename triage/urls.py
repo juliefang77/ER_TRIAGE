@@ -7,7 +7,8 @@ from triage.views import (
     SaaSMedicalStaffViewSet,
     TriageHistoryViewSet,
     SaaSPatientViewSet,
-    TriageHistoryListViewSet
+    TriageHistoryListViewSet,
+    MassInjuryViewSet
 )
 
 router = DefaultRouter()
@@ -22,6 +23,9 @@ router.register(r'patients', SaaSPatientViewSet, basename='saas-patient')
 # Used for 分诊记录
 router.register(r'triagehistory/list', TriageHistoryListViewSet, basename='triage-history-list')  # List view (simplified)
 router.register(r'triagehistory', TriageHistoryViewSet, basename='triage-history')  # Detail view (comprehensive)
+
+# Mass injury list GET 
+router.register(r'mass-injuries', MassInjuryViewSet, basename='mass-injury')
 
 urlpatterns = [
     path('', include(router.urls)),

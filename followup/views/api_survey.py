@@ -26,7 +26,7 @@ class StandardQuestionViewSet(viewsets.ReadOnlyModelViewSet):
             is_active=True
         ).order_by('question_category', 'id')
 
-# View hospital-created survey templates, manually create new survey templates. 人工制作问卷页
+# View hospital-created survey templates
 class SurveyTemplateViewSet(viewsets.ModelViewSet):
     serializer_class = SurveyTemplateDetailSerializer
     authentication_classes = [TokenAuthentication]
@@ -35,7 +35,7 @@ class SurveyTemplateViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Filter templates by current user's hospital
         return SurveyTemplate.objects.filter(
-            hospital=self.request.user,
+            hospital=self.request.user.hospital,
             is_active=True
         ).select_related(
             'question_1',
@@ -53,6 +53,12 @@ class SurveyTemplateViewSet(viewsets.ModelViewSet):
         survey_name = request.data.get('survey_name')
         question_ids = request.data.get('question_ids', [])
         creator_name = request.data.get('creator_name', '未知创建者')  # Default value if not provided
+
+        print("Parsed values:", {  # Debug print
+        'survey_name': survey_name,
+        'question_ids': question_ids,
+        'creator_name': creator_name
+    })
         
         # Validation
         if not survey_name:
@@ -77,7 +83,7 @@ class SurveyTemplateViewSet(viewsets.ModelViewSet):
             # Create template
             template = SurveyTemplate.objects.create(
                 survey_name=survey_name,
-                hospital=request.user,
+                hospital=request.user.hospital,
                 created_by=creator_name,  # Just store the name as text
                 is_active=True
             )
@@ -122,7 +128,7 @@ class SystemTemplateViewSet(viewsets.ReadOnlyModelViewSet):
             'question_8'
         )
 
-# 群发系统预设surveys给患者app
+# 群发surveys给患者app
 class MassSendSurveyViewSet(ViewSet):
     """ViewSet for mass sending system survey templates to patients"""
     serializer_class = MassSendSurveySerializer
@@ -152,6 +158,8 @@ class MassSendSurveyViewSet(ViewSet):
             )
 
         surveys_created = []
+        skipped_patients = []  # Track skipped patients for reporting
+
         for record_id in triage_record_ids:
             # Get the patient record
             patient = TriageRecord.objects.get(id=record_id).patient
@@ -161,10 +169,21 @@ class MassSendSurveyViewSet(ViewSet):
             if not patient_user:
                 continue  # Skip if patient doesn't have an app account
 
+            # Check if patient already has a survey (NOT_SENT is okay)
+            existing_recipient = FollowupRecipient.objects.filter(
+                triage_record_id=record_id,
+                hospital=request.user.hospital,
+                survey_status__in=['NO_RESPONSE', 'YES_RESPONSE']
+            ).exists()
+
+            if existing_recipient:
+                skipped_patients.append(record_id)
+                continue  # Skip this patient
+
             # Update get_or_create to include patient_user
             recipient, _ = FollowupRecipient.objects.get_or_create(
                 triage_record_id=record_id,
-                hospital=request.user,
+                hospital=request.user.hospital,
                 defaults={
                     'patient': patient,
                     'patient_user': patient_user,  # Add this line
@@ -175,18 +194,19 @@ class MassSendSurveyViewSet(ViewSet):
             )
 
             survey = FollowupSurvey.objects.create(
-                hospital=request.user,
+                hospital=request.user.hospital,
                 recipient=recipient,
                 template=template
             )
             surveys_created.append(survey)
 
         return Response({
-            "message": f"Successfully assigned system survey to {len(surveys_created)} patients",
-            "surveys_created": len(surveys_created)
+            "message": f"Successfully assigned system survey to {len(surveys_created)} patients. Skipped {len(skipped_patients)} patients who already have surveys.",
+            "surveys_created": len(surveys_created),
+            "skipped_patients": len(skipped_patients)
         })
 
-# 查看过去发送的 surveys list
+# 查看过去发送的 surveys list (not used)
 class ManagementSurveyHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -194,10 +214,34 @@ class ManagementSurveyHistoryViewSet(viewsets.ReadOnlyModelViewSet):
         return PatientSurveyHistorySerializer
 
     def get_queryset(self):
-        return FollowupSurvey.objects.all().select_related(
-            'recipient__patient',
-            'template'
-        ).order_by('-created_at')
+        queryset = FollowupSurvey.objects.filter(
+            hospital=self.request.user.hospital
+        )
+        
+        if self.action == 'retrieve':
+            # Add more related fields for detailed view
+            queryset = queryset.select_related(
+                'recipient__patient',
+                'template',
+                'response'  # If you have a response model
+            ).prefetch_related(
+                'template__question_1',
+                'template__question_2',
+                'template__question_3',
+                'template__question_4',
+                'template__question_5',
+                'template__question_6',
+                'template__question_7',
+                'template__question_8'
+            )
+        else:
+            # Basic related fields for list view
+            queryset = queryset.select_related(
+                'recipient__patient',
+                'template'
+            )
+        
+        return queryset.order_by('-created_at')
 
 # 人工发送问卷页面，左上角“选择问卷模版” search function
 class SurveyTemplateSearchViewSet(viewsets.ReadOnlyModelViewSet):
@@ -209,7 +253,7 @@ class SurveyTemplateSearchViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         search_query = self.request.query_params.get('search', '')
         return SurveyTemplate.objects.filter(
-            hospital=self.request.user,
+            hospital=self.request.user.hospital,
             is_active=True,
             survey_name__icontains=search_query
         ).order_by('-created_at')  # No need for select_related since we don't use questions

@@ -1,7 +1,7 @@
 # patient_portal/models.py
 
 from django.db import models
-from triage.models import HospitalUser, Hospital
+from triage.models import Hospital
 
 class PatientTriageSubmission(models.Model):
     # Choice Definitions
@@ -100,7 +100,7 @@ class PatientTriageSubmission(models.Model):
 
     # Hospital Info
     hospital = models.ForeignKey(
-        HospitalUser,
+        Hospital,
         on_delete=models.SET_NULL,  # If hospital is deleted, set this field to NULL
         verbose_name='医院',
         null=True,
@@ -271,5 +271,5 @@ class PatientTriageSubmission(models.Model):
 # 16. injury_type | 损伤类型 | CharField (choices)
 # 17. other_inquiry | 非急诊类 | CharField (choices)
 # 18. patient_type | 身份标识 | CharField (choices)
-# 19. uuid | Primary key
+# 19. id
 # 20. status | 状态 ｜ 待处理、已通过

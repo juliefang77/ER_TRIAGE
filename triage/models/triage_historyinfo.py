@@ -56,38 +56,18 @@ class TriageHistoryInfo(models.Model):
     def calculate_stay_duration(self):
         """Calculate stay duration when departure time is set"""
         if self.departure_time and self.triage_record.registration_time:
-            self.stay_duration = self.departure_time - self.triage_record.registration_time
-            self.save(update_fields=['stay_duration'])
+            return self.departure_time - self.triage_record.registration_time
+        return None
 
     def save(self, *args, **kwargs):
         """Override save to calculate stay_duration"""
-        # First save to ensure we have an ID
-        super().save(*args, **kwargs)
-        
-        # Calculate duration if departure_time exists
+        # Calculate duration before saving
         if self.departure_time:
-            self.calculate_stay_duration()
+            self.stay_duration = self.calculate_stay_duration()
+            
+        # Save only once
+        super().save(*args, **kwargs)
 
-    # Staff assignments
-    assigned_doctor = models.ForeignKey(
-        'MedicalStaff',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name='责任医生',
-        related_name='doctor_triage_histories',
-        limit_choices_to={'role': 'DOC'}  # Only show doctors
-    )
-
-    assigned_nurse = models.ForeignKey(
-        'MedicalStaff',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name='责任护士',
-        related_name='nurse_triage_histories',
-        limit_choices_to={'role': 'NUR'}  # Only show nurses
-    )
     
     class Meta:
         db_table = 'triage_history_info'

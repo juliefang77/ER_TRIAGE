@@ -41,7 +41,7 @@ class FollowupRecipient(models.Model):
     )
 
     hospital = models.ForeignKey(
-        'triage.HospitalUser', 
+        'triage.Hospital', 
         on_delete=models.CASCADE, 
         verbose_name='随访医院',
         null=True,

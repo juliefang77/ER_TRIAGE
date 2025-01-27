@@ -6,6 +6,17 @@ from rest_framework import status
 from followup.models import FollowupNotetaking
 from triage.models import Patient
 from ..services.baidu_service import BaiduAIService
+from ..serializers.notes_serializer import AiNotesListSerializer
+
+class AiNotesListViewSet(viewsets.ModelViewSet):
+    serializer_class = AiNotesListSerializer
+
+    def get_queryset(self):
+        return FollowupNotetaking.objects.filter(
+            hospital=self.request.user.hospital
+        ).select_related(
+            'patient' 
+        ).order_by('-created_at')
 
 class AIFollowupNotesViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
@@ -24,7 +35,7 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
             # Search patients belonging to this hospital
             patients = Patient.objects.filter(
                 query,
-                hospital=request.user
+                hospital=request.user.hospital
             ).values(
                 'id_system',  # Changed from id to id_system
                 'name_patient',
@@ -67,13 +78,13 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
             
             patient = Patient.objects.get(
                 id_system=patient_id,  # Changed from id to id_system
-                hospital=request.user
+                hospital=request.user.hospital
             )
             
             # Create new notetaking record
             notetaking = FollowupNotetaking.objects.create(
                 patient=patient,
-                hospital=request.user
+                hospital=request.user.hospital
             )
             
             return Response({
@@ -81,7 +92,7 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
                 'notetaking_id': notetaking.id,
                 'patient_name': patient.name_patient,
                 'patient_phone': patient.patient_phone,
-                'patient_id_system': str(patient.id_system)  # Include UUID in response
+                'patient_id_system': patient.id_system  #  Regular ID
             })
             
         except Patient.DoesNotExist:
@@ -100,7 +111,7 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
         try:
             notetaking = FollowupNotetaking.objects.get(
                 id=pk,
-                hospital=request.user  # Ensure the note belongs to this hospital
+                hospital=request.user.hospital  # Ensure the note belongs to this hospital
             )
             notetaking.raw_notes = request.data.get('raw_notes')
             notetaking.save()
@@ -122,7 +133,7 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
         try:
             notetaking = FollowupNotetaking.objects.get(
                 id=pk,
-                hospital=request.user
+                hospital=request.user.hospital
             )
             
             if not notetaking.raw_notes:
@@ -159,7 +170,7 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
         try:
             notetaking = FollowupNotetaking.objects.get(
                 id=pk,
-                hospital=request.user
+                hospital=request.user.hospital
             )
             processed_notes = request.data.get('processed_notes')
             
