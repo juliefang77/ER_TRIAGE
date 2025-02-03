@@ -6,7 +6,7 @@ class BookingOnline(models.Model):
         ('PATIENT_SUBMITTED', '患者已下单'),
         ('HOSPITAL_ACCEPTED', '医院已接受订单'),
         ('CONSULTATION_COMPLETED', '问诊已完成'),
-        ('CANCELLED', '已取消')
+        ('CANCELLED', '医院已拒绝')
     ]
 
     patient_user = models.ForeignKey(
@@ -65,6 +65,21 @@ class BookingOnline(models.Model):
         null=True,
         blank=True
     )
+
+    actual_time = models.DateTimeField(
+        verbose_name='实际完成/取消时间',
+        null=True,
+        blank=True,
+        help_text='完成或取消时的实际时间'
+    )
+
+    def save(self, *args, **kwargs):
+        # Auto-set actual_time when status changes to completed or cancelled
+        if self.pk:  # Only for existing objects
+            old_instance = BookingOnline.objects.get(pk=self.pk)
+            if old_instance.status != self.status and self.status in ['CONSULTATION_COMPLETED', 'CANCELLED']:
+                self.actual_time = timezone.now()
+        super().save(*args, **kwargs)
 
     qr_code = models.CharField(
         max_length=255, 

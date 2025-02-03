@@ -93,8 +93,13 @@ class SurveyLLMAnalysisSerializer(serializers.ModelSerializer):
     
 # 用于save AI 生成的分析结果稿件, 也用于第一页view 所有已生成的 survey analysis 页
 class SurveyAiSerializer(serializers.ModelSerializer):
-    recipient_count = serializers.IntegerField(read_only=True)
-    recipients = SurveyAnalysisListSerializer(many=True, read_only=True) # 此serializer就是list用的
+    # recipient_count = serializers.IntegerField(read_only=True)
+    # recipients = SurveyAnalysisListSerializer(many=True, read_only=True) # 此serializer就是list用的
+    recipient_count = serializers.SerializerMethodField()
+    recipients = serializers.PrimaryKeyRelatedField(
+        many=True, 
+        read_only=True
+    )
     
     class Meta:
         model = SurveyAi
@@ -109,9 +114,8 @@ class SurveyAiSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['hospital', 'created_at']
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data['recipient_count'] = instance.recipients.count()
-        return data
+    def get_recipient_count(self, obj):
+        return obj.recipients.count()
+
 
 

@@ -12,19 +12,20 @@ from ..serializers.patient_serializers import DateRangeSerializer, DistributionR
 from ...services.stats.patient_stats import PatientDistributionStats
 
 class PatientStatsViewSet(ReadOnlyModelViewSet):  # Change to ReadOnlyModelViewSet
-    serializer_class = DateRangeSerializer  # Add a serializer class
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Explicitly start with TriageRecord
         return TriageRecord.objects.filter(
-            hospital=self.request.user
+            hospital=self.request.user.hospital 
         ).select_related('result')  # Add this to optimize the query
     
     def _get_validated_dates(self, request):
-        date_serializer = DateRangeSerializer(data=request.query_params)
-        date_serializer.is_valid(raise_exception=True)
-        return date_serializer.validated_data
+    # Simply return the date strings from query params
+        return {
+            'start_date': request.query_params.get('start_date'),
+            'end_date': request.query_params.get('end_date')
+        }
 
     @action(detail=False, methods=['GET'])
     def priority_distribution(self, request):

@@ -9,6 +9,7 @@ from ..serializers.patient_serializer import (
     PendingSubmissionMappingSerializer
 )
 from rest_framework.permissions import AllowAny
+from rest_framework.pagination import PageNumberPagination
 
 
 # This is the API for listing all PENDING submissions

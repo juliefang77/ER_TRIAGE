@@ -33,7 +33,7 @@ class HospitalBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookingOnline
         fields = [
-            'id', 'hospital', 'start_time', 'end_time', 'status',
+            'id', 'hospital', 'start_time', 'end_time', 'status', 'actual_time',
             'patient_name', 'patient_phone',  # Add the new fields
             'terminal_trace', 'payment_id'
         ]

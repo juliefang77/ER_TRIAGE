@@ -69,7 +69,7 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
     def create_notetaking(self, request):
         try:
             # Get patient by UUID (changed from ID)
-            patient_id = request.data.get('patient_id_system')  # Changed parameter name
+            patient_id = request.data.get('patient_id_system') 
             if not patient_id:
                 return Response(
                     {'error': 'Patient ID is required'},
@@ -77,7 +77,7 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
                 )
             
             patient = Patient.objects.get(
-                id_system=patient_id,  # Changed from id to id_system
+                id_system=patient_id, 
                 hospital=request.user.hospital
             )
             

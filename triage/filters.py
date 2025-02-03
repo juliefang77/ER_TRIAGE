@@ -1,8 +1,32 @@
 from django_filters import rest_framework as filters
-from .models import TriageRecord
+from .models import TriageRecord, MassInjury
 
 class TriageRecordFilter(filters.FilterSet):
     # Existing date range filters
+    def filter_queryset(self, queryset):
+        print("Initial queryset count:", queryset.count())
+        
+        # Handle list values from QueryDict
+        if 'start_date' in self.data:
+            start_date = self.data.get('start_date')
+            if isinstance(start_date, list):  # Check if it's a list
+                start_date = start_date[0]    # Take first value
+            self.data = dict(self.data)       # Make mutable copy
+            self.data['start_date'] = start_date
+            print("Using start_date:", start_date)
+
+        if 'end_date' in self.data:
+            end_date = self.data.get('end_date')
+            if isinstance(end_date, list):     # Check if it's a list
+                end_date = end_date[0]         # Take first value
+            self.data = dict(self.data)        # Make mutable copy
+            self.data['end_date'] = end_date
+            print("Using end_date:", end_date)
+
+        filtered = super().filter_queryset(queryset)
+        print("Final queryset count:", filtered.count())
+        return filtered
+
     start_date = filters.CharFilter(field_name='registration_time', lookup_expr='gte')
     end_date = filters.CharFilter(field_name='registration_time', lookup_expr='lte')
 
@@ -12,11 +36,11 @@ class TriageRecordFilter(filters.FilterSet):
         lookup_expr='exact'  # Add this to ensure exact matching
     )
 
-    triage_status = filters.CharFilter(field_name='result__status')
-    treatment_area = filters.CharFilter(field_name='result__area')
+    triage_status = filters.CharFilter(field_name='result__triage_status')
+    treatment_area = filters.CharFilter(field_name='result__treatment_area')
     department = filters.CharFilter(field_name='result__department')
-    patient_nextstep = filters.CharFilter(field_name='result__next_step')
-    triage_group = filters.NumberFilter(field_name='result__group')
+    patient_nextstep = filters.CharFilter(field_name='result__patient_nextstep')
+    triage_group = filters.NumberFilter(field_name='result__triage_group')
 
     # TriageRecord filters
     speed_channel = filters.CharFilter(field_name='speed_channel')

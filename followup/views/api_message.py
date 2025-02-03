@@ -9,7 +9,7 @@ from triage.models import TriageRecord
 from django.db import transaction
 from rest_framework import serializers
 
-
+# 群发消息，邀请患者随访，并填写方便的时间
 class MassSendMessageViewSet(viewsets.ViewSet):
     """ViewSet for mass sending messages to patients"""
     serializer_class = MassSendMessageSerializer

@@ -21,9 +21,8 @@ router.register(r'display', FollowupRecordDisplayViewSet, basename='saas-followu
 # 第一页，小眼睛看surveys
 router.register(r'survey-eye', SurveyEyeViewSet, basename='survey-eye')
 
-# Select multiple patients, and add them to 随访计划
-router.register(
-    r'management', AddToFollowupViewSet, basename='saas-followup-management')
+# Select multiple patients, and add them to 随访计划 (NOT USED)
+router.register(r'management', AddToFollowupViewSet, basename='saas-followup-management')
 
 # 查看所有question bank里的问题，drag and pull 制作问卷
 router.register(r'standard-questions', StandardQuestionViewSet, basename='standard-questions')
@@ -37,10 +36,10 @@ router.register(r'system-templates', SystemTemplateViewSet, basename='system-tem
 # 群发系统生成的surveys
 router.register(r'mass-survey', MassSendSurveyViewSet, basename='mass-survey')
 
- # 查看已经填写的surveys
+ # 查看已经填写的surveys (NOT USED)
 router.register(r'management-surveys-history', ManagementSurveyHistoryViewSet, basename='management-survey-history' )
 
-# 群发前端传给Django content 的notification message
+# 群发消息，邀请随访，并让病人填写方便的时间
 router.register(r'mass-message', MassSendMessageViewSet, basename='mass-message')
 
 # 人工发送问卷页面，左上角“选择问卷模版” search function

@@ -8,33 +8,24 @@ class PatientDistributionStats:
     def __init__(self, queryset, start_date=None, end_date=None):
         self.queryset = queryset.select_related('result')
         
-        # Filter by the logged-in hospital user's hospital
-        hospital = queryset.model._default_manager.first().hospital
-        self.queryset = self.queryset.filter(hospital=hospital)
+        print("1. Initial queryset count:", self.queryset.count())
         
-        if start_date and end_date:
-            # Convert dates to timezone-aware datetime objects
-            start_datetime = timezone.make_aware(
-                datetime.combine(start_date, time.min)
-            )
-            end_datetime = timezone.make_aware(
-                datetime.combine(end_date, time.max)
-            )
+        # Simplified date filtering - just use the date strings directly
+        if start_date:
+            self.queryset = self.queryset.filter(registration_time__gte=start_date)
+        if end_date:
+            self.queryset = self.queryset.filter(registration_time__lte=end_date)
             
-            self.queryset = self.queryset.filter(
-                registration_time__gte=start_datetime,
-                registration_time__lte=end_datetime
-            )
-            
+        print("2. After date filter count:", self.queryset.count())
         self.total_patients = self.queryset.count()
               
     def get_priority_level_distribution(self):
-        # Remove the .exclude() call since we want to count all records
-        # Use INNER JOIN instead of LEFT OUTER JOIN
-        distribution = self.queryset.select_related('result')\
+        # Add debug print of raw query
+        distribution_query = self.queryset.select_related('result')\
             .values('result__priority_level')\
-            .annotate(count=Count('id'))\
-            .order_by('result__priority_level')
+            .annotate(count=Count('id'))
+
+        distribution = distribution_query.order_by('result__priority_level')
     
         priority_levels = ['一级', '二级', '三级', '四级']
         counts = [0] * 4
@@ -49,16 +40,11 @@ class PatientDistributionStats:
                 counts[level_index] = count
                 total += count
     
-        # Calculate percentages after we have the total
-        if total > 0:
-            for i in range(4):
-                percentages[i] = (counts[i] / total) * 100
-    
         final_result = {
             'labels': priority_levels,
             'data': counts,
             'total': total,
-            'percentages': percentages
+            'percentages': [(count/total)*100 if total > 0 else 0 for count in counts]
         }
         print("4. Final result:", final_result)
         return final_result

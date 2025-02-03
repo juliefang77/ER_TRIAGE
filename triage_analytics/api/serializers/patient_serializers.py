@@ -4,20 +4,16 @@ from datetime import datetime, time, timedelta
 
 # Date range validation, default to last month
 class DateRangeSerializer(serializers.Serializer):
-    
-    start_date = serializers.DateField(
-        required=False, 
-        default=lambda: datetime.combine(
-            (timezone.now() - timedelta(days=30)).date(), 
-            time.min
-        )
+    start_date = serializers.CharField(
+        required=False,
+        default=lambda: (
+            timezone.now() - timedelta(days=30)
+        ).strftime('%Y-%m-%d')
     )
-    end_date = serializers.DateField(
-        required=False, 
-        default=lambda: datetime.combine(
-            timezone.now().date(), 
-            time.max
-        )
+    
+    end_date = serializers.CharField(
+        required=False,
+        default=lambda: timezone.now().strftime('%Y-%m-%d')
     )
 
 

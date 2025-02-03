@@ -78,6 +78,10 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',  # 医院login
     'followup', # followup app
     'triage_analytics', # 分诊统计
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
+    'health_check.storage',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +126,7 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': 'Juliefang7',  # Add your password if you have one
         'HOST': 'localhost',
+        # 'HOST': 'host.docker.internal',  # This allows Docker container to connect to host machine's MySQL
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',

@@ -11,18 +11,22 @@ from followup.serializers.survey_serializer import ManagementSurveyDetailSeriali
 from followup.filters import AiSurveyRecipientFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-class SurveyAnalysisListViewSet(viewsets.ReadOnlyModelViewSet):
+from rest_framework.pagination import PageNumberPagination
+
+
+class SurveyAnalysisListViewSet(viewsets.ModelViewSet):
     serializer_class = SurveyAiSerializer
     
     def get_queryset(self):
         # Filter queryset to only show analyses for the current hospital
         return SurveyAi.objects.filter(
             hospital=self.request.user.hospital
+        ).prefetch_related(
+            'recipients'  # Add this to optimize the query
         ).order_by('-created_at')
 
 class SurveyAnalysisViewSet(viewsets.ViewSet):
     filter_backends = [DjangoFilterBackend]
-    filterset_class = AiSurveyRecipientFilter
 
     def list(self, request):
         # Get completed surveys with related data

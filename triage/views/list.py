@@ -13,9 +13,9 @@ from triage.serializers.history_serializer import TriageHistoryListSerializer
 
 # Custom pagination class
 class TriageHistoryPagination(PageNumberPagination):
-    page_size = 20  # Number of records per page
+    page_size = 10  # Number of records per page
     page_size_query_param = 'page_size'
-    max_page_size = 100
+    max_page_size = 20
 
 # 分诊记录，含所有细节 (CRUD)
 class TriageHistoryViewSet(viewsets.ModelViewSet):

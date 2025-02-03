@@ -42,24 +42,40 @@ class TriageResultSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class VitalSignsSerializer(serializers.ModelSerializer):
+    VALID_POSITIONS = ['L', 'B', 'C', 'A', 'H', 'P']  # Add all valid codes
+
     injury_position = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.CharField(max_length=1),  # Limit to single character
         required=False,
         allow_empty=True,
         allow_null=True
     )
 
+    def to_internal_value(self, data):
+        validated_data = super().to_internal_value(data)
+        
+        if 'injury_position' in validated_data and validated_data['injury_position']:
+            # Convert list to comma-separated string
+            validated_data['injury_position'] = ','.join(validated_data['injury_position'])
+        
+        return validated_data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        
+        if instance.injury_position:
+            # Handle both string and list cases
+            if isinstance(instance.injury_position, str):
+                ret['injury_position'] = instance.injury_position.split(',')
+            else:
+                ret['injury_position'] = instance.injury_position
+                
+        return ret
+
     class Meta:
         model = VitalSigns
         fields = '__all__'
 
-    def validate_injury_position(self, value):
-        valid_choices = [choice[0] for choice in VitalSigns.INJURY_POSITIONS]
-        if value:
-            for pos in value:
-                if pos not in valid_choices:
-                    raise serializers.ValidationError(f"Invalid choice: {pos}")
-        return value
 
 # Feed into 分诊记录 API
 class TriageHistoryInfoSerializer(serializers.ModelSerializer):

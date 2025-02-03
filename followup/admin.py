@@ -161,7 +161,7 @@ class SurveyAiAdmin(admin.ModelAdmin):
 
 @admin.register(BookingOnline)
 class BookingOnlineAdmin(admin.ModelAdmin):
-    list_display = ['id', 'get_patient_name', 'hospital', 'start_time', 'end_time', 'status']
+    list_display = ['id', 'get_patient_name', 'hospital', 'start_time', 'end_time', 'status', "actual_time"]
     search_fields = ['patient_user__first_name', 'hospital__name']  # Update search fields
     list_filter = ['status']
 

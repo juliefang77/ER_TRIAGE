@@ -20,12 +20,34 @@ class ResultListSerializer(serializers.ModelSerializer):
         fields = ['id', 'priority_level', 'treatment_area', 'triage_status', 'department', 'patient_nextstep']  
 
 class VitalListSerializer(serializers.ModelSerializer):
+    VALID_POSITIONS = ['L', 'B', 'C', 'A', 'H', 'P']  # Add all valid codes
+
     injury_position = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.CharField(max_length=1),  # Limit to single character
         required=False,
         allow_empty=True,
         allow_null=True
     )
+
+    def to_internal_value(self, data):
+        validated_data = super().to_internal_value(data)
+        
+        if 'injury_position' in validated_data and validated_data['injury_position']:
+            # Convert list to comma-separated string
+            validated_data['injury_position'] = ','.join(validated_data['injury_position'])
+        
+        return validated_data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        
+        if instance.injury_position:
+            # Clean and process the string
+            cleaned = instance.injury_position.replace("'", "").replace("[", "").replace("]", "")
+            positions = [pos.strip() for pos in cleaned.split(',') if pos.strip()]
+            ret['injury_position'] = positions
+                
+        return ret
 
     class Meta:
         model = VitalSigns

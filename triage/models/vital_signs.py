@@ -19,12 +19,12 @@ class VitalSigns(models.Model):
     ]
 
     INJURY_POSITIONS = [
-        ('LIMBS_SKIN', '四肢/皮肤'),
-        ('BACK', '背部'),
-        ('CHEST', '胸部'),
-        ('ABDOMEN', '腹部'),
-        ('HEAD_NECK', '头颈部'),
-        ('BUTTOCKS', '臀部')  # Added 臀部
+        ('L', '四肢/皮肤'),
+        ('B', '背部'),
+        ('C', '胸部'),
+        ('A', '腹部'),
+        ('H', '头颈部'),
+        ('P', '臀部')  # Added 臀部
     ]
 
     INJURY_TYPES = [

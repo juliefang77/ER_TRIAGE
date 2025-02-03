@@ -27,4 +27,5 @@ urlpatterns = [
     path('apichart/', include('triage_analytics.urls')),
     path('apifollowup/', include('followup.urls')),
     path('ai/', include('ai_services.urls')),
+    path('health/', include('health_check.urls')),
 ]

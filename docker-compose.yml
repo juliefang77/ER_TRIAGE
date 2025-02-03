@@ -1,0 +1,50 @@
+# docker-compose.yml (for local development)
+version: '3.8'  # Docker Compose version
+
+services:
+  web:  # Django web application service
+    build: .  # Builds from Dockerfile in current directory
+    command: python manage.py runserver 0.0.0.0:8000  # Development server command
+    volumes:
+      - .:/app  # Mounts current directory to /app for live code updates
+    ports:
+      - "8000:8000"  # Maps host port to container port
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Allows container to access host machine services
+    environment:
+      - DEBUG=1  # Enable Django debug mode for development
+      - DJANGO_SETTINGS_MODULE=config.settings  # Should match your settings path
+      - PYTHONPATH=/app  # Add this to help Python find your modules
+      - PYTHONUNBUFFERED=1  # Recommended for Docker Python apps
+    depends_on:
+      db:
+        condition: service_healthy  # Ensures database is ready before starting web
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 30s  # Gives application time to start up
+
+  db:  # MySQL database service
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql  # Persists database data
+    environment:
+      - MYSQL_ROOT_PASSWORD=Juliefang7  # Root password (use .env file in practice)
+      - MYSQL_DATABASE=er_triage_system  # Database name
+      - MYSQL_USER=er_triage_user       # Add a non-root user (recommended)
+      - MYSQL_PASSWORD=your_password    # User password
+    ports:
+      - "3306:3306"  # Expose MySQL port for local development
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password  # Add this for compatibility
+    cap_add:
+      - SYS_NICE  # Helps with MySQL performance
+
+volumes:
+  mysql_data:  # Named volume for persisting MySQL data

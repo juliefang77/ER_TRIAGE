@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 
-#  Patient submit the form
+# Patient submit the form
 # Patient submit the form
 class PatientTriageSubmissionViewSet(viewsets.ModelViewSet):
     queryset = PatientTriageSubmission.objects.all()

@@ -1,6 +1,7 @@
 from triage.models import Patient, TriageRecord, TriageResult, VitalSigns, TriageHistoryInfo, HospitalUser, Hospital
 from triage.serializers.triage_serializer import TriageRecordSerializer, PatientSerializer
 from rest_framework import viewsets
+from patient_portal.models import PatientTriageSubmission
 
 # Not used
 class SaaSPatientViewSet(viewsets.ModelViewSet):
@@ -15,10 +16,12 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         hospital = user.hospital  # Get hospital from user
-        print("Received data:", self.request.data)  # Raw data
-        print("Serializer data:", serializer.validated_data)  # Validated data
-        print("User:", user)
-        print("Hospital:", hospital)
+        print("Received data:", self.request.data)  # Shows raw incoming data
+        print("Serializer data:", serializer.validated_data)  # Shows data after validation
+        
+
+        # Get the original submission pk from the URL or request data
+        patient_submission_pk = self.request.data.get('patient_submission_id') 
 
         # Get all nested data from request.data
         patient_data = self.request.data.get('patient')
@@ -57,6 +60,7 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
                 **vitalsigns_data
             )
 
+        result_data['triage_status'] = 'IN_PROGRESS'  # Force status to IN_PROGRESS 已分诊
         if result_data:
             TriageResult.objects.create(
                 triage_record=triage_record,
@@ -64,11 +68,19 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
             )
         
         # Add history info creation
+        print("History info data:", history_info_data)  # Check what data is received
         if history_info_data:
             TriageHistoryInfo.objects.create(
                 triage_record=triage_record,
                 **history_info_data
             )
+
+        # 已分诊的患者不再出现在待approve的列表里
+        if patient_submission_pk:
+            PatientTriageSubmission.objects.filter(
+                id=patient_submission_pk,
+                hospital=hospital
+            ).update(status='APPROVED')
 
     def get_queryset(self):
         return TriageRecord.objects.select_related(

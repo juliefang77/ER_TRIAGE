@@ -19,8 +19,13 @@ from rest_framework import exceptions
 from patient_portal.models import PatientUser
 # filters
 from rest_framework import filters
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 
+from django_filters import rest_framework as filters
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from django_filters import FilterSet  # Add this import
+from django_filters import FilterSet, CharFilter, ChoiceFilter  # Import specific filters
 # 患者小filter
 class PatientBookingFilter(FilterSet):
     class Meta:
@@ -112,15 +117,75 @@ class BookingViewSet(viewsets.ModelViewSet):
             'order_no': payment_info['order_no']
         })
 
+class BookingPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class HospitalBookingFilter(FilterSet):
+    actual_time_start = CharFilter(field_name='actual_time', lookup_expr='gte')
+    actual_time_end = CharFilter(field_name='actual_time', lookup_expr='lte')
+    patient_name = filters.CharFilter(field_name='patient_user__first_name', lookup_expr='icontains')
+    patient_phone = filters.CharFilter(field_name='patient_user__phone', lookup_expr='icontains')
+    status = filters.ChoiceFilter(choices=BookingOnline.APPOINTMENT_STATUS)
+
+    class Meta:
+        model = BookingOnline
+        fields = ['actual_time_start', 'actual_time_end', 'patient_name', 'patient_phone', 'status']
+
+
 # 医院管理订单
 class HospitalBookingViewSet(viewsets.ModelViewSet):
     serializer_class = HospitalBookingSerializer
-    # No need to specify authentication_classes since we're using default TokenAuthentication
+    pagination_class = BookingPagination
+    filterset_class = HospitalBookingFilter
+    search_fields = ['patient_user__first_name', 'patient_user__phone']
     
     def get_queryset(self):
         return BookingOnline.objects.filter(
             hospital=self.request.user.hospital
-        ).select_related('patient_user').order_by('-start_time')  # Fix parenthesis
+        ).select_related('patient_user').order_by('-start_time')
+    
+    @action(detail=False, methods=['get'])
+    def pending(self, request):
+        """Get all pending bookings (PATIENT_SUBMITTED)"""
+        queryset = self.get_queryset().filter(status='PATIENT_SUBMITTED')
+        return self.get_paginated_response(
+            self.get_serializer(self.paginate_queryset(queryset), many=True).data
+        )
+    
+    @action(detail=False, methods=['get'])
+    def accepted(self, request):
+        """Get all accepted bookings (HOSPITAL_ACCEPTED)"""
+        queryset = self.get_queryset().filter(status='HOSPITAL_ACCEPTED')
+        return self.get_paginated_response(
+            self.get_serializer(self.paginate_queryset(queryset), many=True).data
+        )
+    
+    @action(detail=False, methods=['get'])
+    def history(self, request):
+        """Get completed and cancelled bookings"""
+        queryset = self.get_queryset().filter(
+            status__in=['CONSULTATION_COMPLETED', 'CANCELLED']
+        )
+        filtered_queryset = self.filter_queryset(queryset)
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(filtered_queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def statistics(self, request):
+        """Get booking statistics"""
+        queryset = self.get_queryset()
+        return Response({
+            'pending_count': queryset.filter(status='PATIENT_SUBMITTED').count(),
+            'accepted_count': queryset.filter(status='HOSPITAL_ACCEPTED').count(),
+            'completed_count': queryset.filter(status='CONSULTATION_COMPLETED').count(),
+            'cancelled_count': queryset.filter(status='CANCELLED').count(),
+        })
     
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):

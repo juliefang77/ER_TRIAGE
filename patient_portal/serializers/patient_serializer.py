@@ -5,6 +5,34 @@ from ..models import PatientTriageSubmission
 
 # Patient filling form 
 class PatientTriageSubmissionSerializer(serializers.ModelSerializer):
+
+    VALID_POSITIONS = ['L', 'B', 'C', 'A', 'H', 'P']  # Add all valid codes
+    
+    injury_position = serializers.ListField(
+        child=serializers.CharField(max_length=1),  # Limit to single character
+        required=False,
+        allow_empty=True,
+        allow_null=True
+    )
+
+    def to_internal_value(self, data):
+        validated_data = super().to_internal_value(data)
+        
+        if 'injury_position' in validated_data and validated_data['injury_position']:
+            # Convert list to comma-separated string
+            validated_data['injury_position'] = ','.join(validated_data['injury_position'])
+        
+        return validated_data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        
+        if instance.injury_position:
+            # Convert string back to list
+            ret['injury_position'] = instance.get_injury_positions()
+        
+        return ret
+
     class Meta:
         model = PatientTriageSubmission
         fields = '__all__'
@@ -12,6 +40,33 @@ class PatientTriageSubmissionSerializer(serializers.ModelSerializer):
 
 # Nurse views all PENDING patients as a list, read only
 class PendingSubmissionListSerializer(serializers.ModelSerializer):
+    VALID_POSITIONS = ['L', 'B', 'C', 'A', 'H', 'P']  # Add all valid codes
+
+    injury_position = serializers.ListField(
+        child=serializers.CharField(max_length=1),  # Limit to single character
+        required=False,
+        allow_empty=True,
+        allow_null=True
+    )
+
+    def to_internal_value(self, data):
+        validated_data = super().to_internal_value(data)
+        
+        if 'injury_position' in validated_data and validated_data['injury_position']:
+            # Convert list to comma-separated string
+            validated_data['injury_position'] = ','.join(validated_data['injury_position'])
+        
+        return validated_data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        
+        if instance.injury_position:
+            # Convert string back to list
+            ret['injury_position'] = instance.get_injury_positions()
+        
+        return ret
+
     class Meta:
         model = PatientTriageSubmission
         fields = '__all__'
@@ -19,6 +74,7 @@ class PendingSubmissionListSerializer(serializers.ModelSerializer):
 
 # Nurse opens an individual patient's page, and sees autofilling, can edit
 class PendingSubmissionMappingSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = PatientTriageSubmission
         fields = '__all__'

@@ -9,12 +9,33 @@ class FollowupRecipientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class InjurySerializer(serializers.ModelSerializer):
+    VALID_POSITIONS = ['L', 'B', 'C', 'A', 'H', 'P']
+
     injury_position = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.CharField(max_length=1),
         required=False,
         allow_empty=True,
         allow_null=True
     )
+
+    def to_internal_value(self, data):
+        validated_data = super().to_internal_value(data)
+        
+        if 'injury_position' in validated_data and validated_data['injury_position']:
+            validated_data['injury_position'] = ','.join(validated_data['injury_position'])
+        
+        return validated_data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        
+        if instance.injury_position:
+            # Clean and process the string
+            cleaned = instance.injury_position.replace("'", "").replace("[", "").replace("]", "")
+            positions = [pos.strip() for pos in cleaned.split(',') if pos.strip()]
+            ret['injury_position'] = positions
+                
+        return ret
 
     class Meta:
         model = VitalSigns

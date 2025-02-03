@@ -18,10 +18,10 @@ class PatientTriageSubmission(models.Model):
     ]
 
     ID_TYPE_CHOICES = [
-        ('ID_CARD', '居民身份证'),
+        ('ID', '居民身份证'),
         ('HUKOU', '居民户口本'),
-        ('HK_MC_TW', '港澳台居民来往内地通行证'),
-        ('FOREIGNER', '外国人永久居留证'),
+        ('HMT', '港澳台居民来往内地通行证'),
+        ('PERMANENT', '外国人永久居留证'),
         ('PASSPORT', '护照'),
         ('MILITARY', '军官证')
     ]
@@ -36,52 +36,51 @@ class PatientTriageSubmission(models.Model):
     ]
 
     INSURANCE_TYPE_CHOICES = [
-        ('SELF_PAY', '自费'),
+        ('SELF', '自费'),
         ('PUBLIC', '公费'),
-        ('MEDICAL_INSURANCE', '医保'),
+        ('MEDICAL', '医保'),
         ('COMMERCIAL', '商保'),
-        ('HOSPITAL_STAFF', '本院职工'),
-        ('STAFF_FAMILY', '职工家属'),
-        ('OTHER_LOCATION', '异地医保'),
+        ('EMPLOYEE', '本院职工'),
+        ('EMPLOYEE_FAMILY', '职工家属'),
+        ('OTHER_REGION', '异地医保'),
         ('NEW_RURAL', '新农合'),
         ('URBAN_RURAL', '城乡医保'),
-        ('FIVE_GUARANTEES', '五保特困'),
-        ('LOW_INSURANCE', '低保'),
+        ('FIVE_SPECIAL', '五保特困'),
+        ('LOW_INCOME', '低保'),
         ('MILITARY', '军烈'),
-        ('EARTHQUAKE', '512地震'),
-        ('RAILWAY_STAFF', '轻轨工伤'),
-        ('RAILWAY_INSURANCE', '铁路医保'),
+        ('EARTHQUAKE_512', '512地震'),
+        ('MINOR_INJURY', '轻轨工伤'),
+        ('RAILWAY', '铁路医保'),
         ('ROAD_FUND', '道路基金'),
         ('DISABILITY', '复员伤残'),
         ('DISABLED', '残疾'),
-        ('ISOLATION', '担保'),
+        ('SPONSOR', '担保'),
         ('HOMELESS', '无主病人'),
-        ('HIGH_VALUE', '高价'),
+        ('LEAVE', '离休'),
         ('WORK_INJURY', '工伤'),
-        ('TRAFFIC_INJURY', '车伤'),
+        ('CAR_INJURY', '车伤'),
         ('MATERNITY', '生育'),
-        ('SPECIAL_AGREEMENT', '特约')
+        ('SPECIAL', '特约')
     ]
 
     PATIENT_TYPE_CHOICES = [
-        ('THREE_NOS', '三无人员'),
+        ('THREE_NO', '三无人员'),
         ('LOW_INCOME', '低保户'),
-        ('SPECIAL_CARE', '特困户'),
-        ('POOR_CARD', '建卡贫困户'),
-        ('FIVE_GUARANTEES', '五保户'),
-        ('8023_TEAM', '8023部队'),
+        ('SPECIAL_POVERTY', '特困户'),
+        ('CARD_POVERTY', '建卡贫困户'),
+        ('FIVE_GUARANTEE', '五保户'),
+        ('MILITARY_8023', '8023部队'),
         ('ACTIVE_MILITARY', '现役军人'),
         ('RETIRED_MILITARY', '退伍军人'),
-        ('MISSING_PERSON', '失独人员')
+        ('ORPHANED', '失独人员')
     ]
 
     OTHER_INQUIRY_CHOICES = [
         ('ADMISSION_CERT', '开住院证'),
         ('PRESCRIPTION', '开药'),
-        ('MEDICAL_CERT', '开单'),
+        ('MEDICAL_ORDER', '开单'),
         ('NUCLEIC_TEST', '核酸检测')
     ]
-
 
     INJURY_TYPE_CHOICES = [
         ('LACERATION', '裂伤/挫伤'),
@@ -89,6 +88,15 @@ class PatientTriageSubmission(models.Model):
         ('BLUNT', '钝性伤'),
         ('GUNSHOT', '弹道伤'),
         ('BURN', '烧伤')  # Added 烧伤
+    ]
+
+    INJURY_POSITIONS = [
+        ('L', '四肢/皮肤'),
+        ('B', '背部'),
+        ('C', '胸部'),
+        ('A', '腹部'),
+        ('H', '头颈部'),
+        ('P', '臀部')  # Added 臀部
     ]
 
     status = models.CharField(
@@ -204,6 +212,7 @@ class PatientTriageSubmission(models.Model):
 
     injury_position = models.CharField(
         max_length=255,
+        choices=INJURY_POSITIONS,
         verbose_name='小人图/损伤部位',
         null=True,
         blank=True
@@ -243,6 +252,19 @@ class PatientTriageSubmission(models.Model):
     class Meta:
         verbose_name = '患者分诊提交'
         verbose_name_plural = '患者分诊提交'
+
+    def set_injury_positions(self, positions):
+        """Convert list to comma-separated string"""
+        if positions:
+            self.injury_position = ','.join(positions)
+        else:
+            self.injury_position = None
+
+    def get_injury_positions(self):
+        """Convert comma-separated string to list"""
+        if self.injury_position:
+            return self.injury_position.split(',')
+        return []
 
     def __str__(self):
         hospital_name = self.hospital.name if self.hospital else 'Unknown'
