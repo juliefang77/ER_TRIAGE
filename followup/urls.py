@@ -10,7 +10,8 @@ MassSendSurveyViewSet,
 ManagementSurveyHistoryViewSet,
 MassSendMessageViewSet,
 SurveyTemplateSearchViewSet,
-SurveyEyeViewSet
+SurveyEyeViewSet,
+HospitalUserViewSet
 )
 
 router = DefaultRouter()
@@ -44,6 +45,9 @@ router.register(r'mass-message', MassSendMessageViewSet, basename='mass-message'
 
 # 人工发送问卷页面，左上角“选择问卷模版” search function
 router.register(r'template-search', SurveyTemplateSearchViewSet, basename='template-search')
+
+# SaaS API: give frontend hospital name
+router.register(r'hospital-user', HospitalUserViewSet, basename='hospital-user')
 
 urlpatterns = [
     path('', include(router.urls)),

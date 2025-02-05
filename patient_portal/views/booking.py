@@ -33,26 +33,19 @@ class PatientBookingFilter(FilterSet):
         fields = ['status']  # Fields that can be filtered
 
 # 患者app的自定义authentication
-class PatientPhoneAuthentication(authentication.BaseAuthentication):
+from rest_framework.authentication import TokenAuthentication
+from ..models.patient_token import PatientToken
+
+class PatientTokenAuthentication(TokenAuthentication):
+    model = PatientToken  # Use our custom PatientToken model
+
     def authenticate(self, request):
-        # Skip this auth method for hospital endpoints
+        # Skip this auth method for non-patient endpoints
         if not request.path.startswith('/apipatient/'):
             return None
             
-        phone = request.META.get('HTTP_X_PATIENT_PHONE')
-        password = request.META.get('HTTP_X_PATIENT_PASSWORD')
-        
-        if not phone or not password:
-            return None
+        return super().authenticate(request)
 
-        try:
-            patient = PatientUser.objects.get(phone=phone)
-            if patient.check_password(password):
-                return (patient, None)
-        except PatientUser.DoesNotExist:
-            raise exceptions.AuthenticationFailed('No such patient')
-
-        return None
 
 # Payment success webhook
 @csrf_exempt
@@ -73,13 +66,23 @@ def payment_notify(request):
         print(f"Payment notification error: {str(e)}")
         return HttpResponse('fail')
 
+
+from rest_framework.pagination import PageNumberPagination
+
+# 患者看已下单的 bookings pagination
+class PatientBookingPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 # 患者下单 book appointment and make payment
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = BookingOnline.objects.all()
     serializer_class = BookingCreateSerializer
-    authentication_classes = [PatientPhoneAuthentication]
+    authentication_classes = [PatientTokenAuthentication]
     filter_backends = [DjangoFilterBackend] 
     filterset_class = PatientBookingFilter  # Filter by status
+    pagination_class = PatientBookingPagination
 
     def get_queryset(self):
         return BookingOnline.objects.filter(
@@ -117,7 +120,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             'order_no': payment_info['order_no']
         })
 
-class BookingPagination(PageNumberPagination):
+class HospitalBookingPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
@@ -137,7 +140,7 @@ class HospitalBookingFilter(FilterSet):
 # 医院管理订单
 class HospitalBookingViewSet(viewsets.ModelViewSet):
     serializer_class = HospitalBookingSerializer
-    pagination_class = BookingPagination
+    pagination_class = HospitalBookingPagination
     filterset_class = HospitalBookingFilter
     search_fields = ['patient_user__first_name', 'patient_user__phone']
     
@@ -240,6 +243,34 @@ class HospitalBookingViewSet(viewsets.ModelViewSet):
             
         # Mark as completed
         booking.status = 'CONSULTATION_COMPLETED'
+        booking.save()
+        
+        serializer = self.get_serializer(booking)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Reject a booking with reason"""
+        booking = self.get_object()
+        
+        # Check if booking can be rejected
+        if booking.status != 'PATIENT_SUBMITTED':
+            return Response(
+                {'error': '只能拒绝待处理的预约'}, 
+                status=400
+            )
+            
+        # Get and validate reject reason
+        reject_reason = request.data.get('reject_reason')
+        if not reject_reason:
+            return Response(
+                {'error': '请提供拒绝原因'}, 
+                status=400
+            )
+            
+        # Update booking status and reason
+        booking.status = 'CANCELLED'
+        booking.reject_reason = reject_reason
         booking.save()
         
         serializer = self.get_serializer(booking)

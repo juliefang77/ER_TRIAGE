@@ -48,3 +48,4 @@ class PatientMessageViewSet(viewsets.ReadOnlyModelViewSet):
             reply_serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+    

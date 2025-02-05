@@ -9,6 +9,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         model = BookingOnline
         fields = [
             'id', 'hospital', 'hospital_name',  # Add hospital name for reading
+            'date_of_birth', 'old_patient', 'complaint',
             'start_time', 'end_time',
             'status'  # Add status for reading
         ]
@@ -34,6 +35,7 @@ class HospitalBookingSerializer(serializers.ModelSerializer):
         model = BookingOnline
         fields = [
             'id', 'hospital', 'start_time', 'end_time', 'status', 'actual_time',
+            'old_patient', 'complaint', 'date_of_birth', 'reject_reason',
             'patient_name', 'patient_phone',  # Add the new fields
             'terminal_trace', 'payment_id'
         ]

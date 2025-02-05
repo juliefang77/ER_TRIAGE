@@ -53,17 +53,3 @@ class FollowupMainFilter(filters.FilterSet):
             'call_status'
         ]
 
-class AiSurveyRecipientFilter(filters.FilterSet):
-    # Date range filters for registration time
-    start_date = filters.CharFilter(field_name='triage_record__registration_time', lookup_expr='gte')
-    end_date = filters.CharFilter(field_name='triage_record__registration_time', lookup_expr='lte')
-    
-    # Specialty type filter
-    specialty_type = filters.CharFilter(field_name='triage_record__specialty_type')
-    
-    # Priority level filter
-    priority_level = filters.CharFilter(field_name='triage_record__result__priority_level')
-
-    class Meta:
-        model = FollowupRecipient
-        fields = ['start_date', 'end_date', 'specialty_type', 'priority_level']

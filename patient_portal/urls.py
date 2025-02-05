@@ -1,7 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    register, verify_registration, login,
     PatientTriageSubmissionViewSet,
     PendingSubmissionViewSet,
     PendingSubmissionDataViewSet,
@@ -9,7 +8,10 @@ from .views import (
     PatientMessageViewSet,
     BookingViewSet,
     HospitalBookingViewSet,
-    PatientSurveyListViewSet
+    PatientSurveyListViewSet,
+    PatientAuthToken,
+    PatientRegisterView,
+    PatientVerifyView,
 )
 # Authentication
 from django.urls import path
@@ -42,7 +44,7 @@ router.register(r'hospital-bookings', HospitalBookingViewSet, basename='hospital
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('register/', register, name='patient-register'),
-    path('verify/', verify_registration, name='patient-verify'),
-    path('login/', login, name='patient-login'),
+    path('register/', PatientRegisterView.as_view(), name='patient-register'),
+    path('verify/', PatientVerifyView.as_view(), name='patient-verify'),
+    path('token/', PatientAuthToken.as_view(), name='patient-token'),
 ]

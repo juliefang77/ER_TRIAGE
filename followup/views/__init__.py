@@ -8,7 +8,7 @@ from .api_survey import (
     ManagementSurveyHistoryViewSet,
     SurveyTemplateSearchViewSet
     )
-from .api_message import MassSendMessageViewSet
+from .api_message import MassSendMessageViewSet, HospitalUserViewSet
 
 __all__ = [
     'FollowupRecordDisplayViewSet',
@@ -21,4 +21,5 @@ __all__ = [
     'MassSendMessageViewSet',
     'SurveyTemplateSearchViewSet',
     'SurveyEyeViewSet',
+    'HospitalUserViewSet',
 ]

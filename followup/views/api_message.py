@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from followup.serializers.message_serializer import MassSendMessageSerializer
+from followup.serializers.message_serializer import MassSendMessageSerializer, HospitalInfoSerializer
 from followup.models import FollowupMessage, FollowupRecipient
 from triage.models import TriageRecord
 from django.db import transaction
@@ -72,3 +72,17 @@ class MassSendMessageViewSet(viewsets.ViewSet):
             return Response({
                 "error": str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+# Frontend gets hospital name
+class HospitalUserViewSet(viewsets.ViewSet):
+    @action(detail=False, methods=['get'])
+    def my_hospital(self, request):
+        """Get current user's affiliated hospital"""
+        if not request.user.is_authenticated:
+            return Response({'error': '请先登录'}, status=401)
+            
+        if not request.user.hospital:
+            return Response({'error': '用户未关联医院'}, status=404)
+            
+        serializer = HospitalInfoSerializer(request.user.hospital)
+        return Response(serializer.data)

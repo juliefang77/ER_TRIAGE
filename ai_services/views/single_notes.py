@@ -8,8 +8,33 @@ from triage.models import Patient
 from ..services.baidu_service import BaiduAIService
 from ..serializers.notes_serializer import AiNotesListSerializer
 
+from rest_framework.pagination import PageNumberPagination
+from django_filters import rest_framework as filters
+
+class AiNotesPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+# 随访中，查看保存笔记页面
+class AiNotesFilter(filters.FilterSet):
+    # Date range filters for created_at
+    created_at_start = filters.CharFilter(field_name='created_at', lookup_expr='gte')
+    created_at_end = filters.CharFilter(field_name='created_at', lookup_expr='lte')
+    
+    # Patient name and phone filters (through foreign key)
+    name_patient = filters.CharFilter(field_name='patient__name_patient', lookup_expr='icontains')
+    patient_phone = filters.CharFilter(field_name='patient__patient_phone', lookup_expr='icontains')
+
+    class Meta:
+        model = FollowupNotetaking
+        fields = ['created_at_start', 'created_at_end', 'name_patient', 'patient_phone']
+
 class AiNotesListViewSet(viewsets.ModelViewSet):
     serializer_class = AiNotesListSerializer
+    pagination_class = AiNotesPagination
+    filterset_class = AiNotesFilter
+    search_fields = ['patient__name_patient', 'patient__patient_phone']
 
     def get_queryset(self):
         return FollowupNotetaking.objects.filter(

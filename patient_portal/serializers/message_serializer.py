@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from followup.models import FollowupMessage
+from triage.models import Hospital
 
 class MessageReplySerializer(serializers.Serializer):
     reply_time = serializers.ChoiceField(
@@ -18,3 +19,4 @@ class PatientMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowupMessage
         fields = ['id', 'content', 'sent_at', 'responded_at', 'hospital_name']
+

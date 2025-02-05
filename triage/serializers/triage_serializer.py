@@ -64,11 +64,10 @@ class VitalSignsSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         
         if instance.injury_position:
-            # Handle both string and list cases
-            if isinstance(instance.injury_position, str):
-                ret['injury_position'] = instance.injury_position.split(',')
-            else:
-                ret['injury_position'] = instance.injury_position
+            # Clean and process the string
+            cleaned = instance.injury_position.replace("'", "").replace("[", "").replace("]", "")
+            positions = [pos.strip() for pos in cleaned.split(',') if pos.strip()]
+            ret['injury_position'] = positions
                 
         return ret
 

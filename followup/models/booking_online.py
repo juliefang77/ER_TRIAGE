@@ -73,6 +73,32 @@ class BookingOnline(models.Model):
         help_text='完成或取消时的实际时间'
     )
 
+    old_patient = models.BooleanField(
+        verbose_name='是否曾在本院急诊科就诊',
+        default=False,
+        null=True,
+        blank=True
+    )
+
+    complaint = models.TextField(
+        verbose_name='主诉',
+        null=True,
+        blank=True
+    )
+
+    date_of_birth = models.DateField(
+        verbose_name='出生日期',
+        null=True,
+        blank=True
+    )
+
+    reject_reason = models.TextField(
+        verbose_name='拒接接诊原因',
+        null=True,
+        blank=True,
+        help_text='医院拒绝接诊的原因说明'
+    )
+
     def save(self, *args, **kwargs):
         # Auto-set actual_time when status changes to completed or cancelled
         if self.pk:  # Only for existing objects

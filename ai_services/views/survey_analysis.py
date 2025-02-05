@@ -8,10 +8,10 @@ from followup.models import FollowupRecipient, FollowupSurvey, SurveyAi
 from ..serializers.survey_serializer import SurveyAnalysisListSerializer, SurveyAiSerializer, SurveyLLMAnalysisSerializer
 from followup.serializers.survey_serializer import ManagementSurveyDetailSerializer
 # Filters
-from followup.filters import AiSurveyRecipientFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.pagination import PageNumberPagination
+from django_filters import rest_framework as filters
 
 
 class SurveyAnalysisListViewSet(viewsets.ModelViewSet):
@@ -25,8 +25,31 @@ class SurveyAnalysisListViewSet(viewsets.ModelViewSet):
             'recipients'  # Add this to optimize the query
         ).order_by('-created_at')
 
+# 分析问卷选择患者时的pagination
+class SurveyAnalysisPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class AiSurveyRecipientFilter(filters.FilterSet):
+    # Date range filters for registration time
+    start_date = filters.CharFilter(field_name='triage_record__registration_time', lookup_expr='gte')
+    end_date = filters.CharFilter(field_name='triage_record__registration_time', lookup_expr='lte')
+    
+    # Specialty type filter
+    specialty_type = filters.CharFilter(field_name='triage_record__specialty_type')
+    
+    # Priority level filter
+    priority_level = filters.CharFilter(field_name='triage_record__result__priority_level')
+
+    class Meta:
+        model = FollowupRecipient
+        fields = ['start_date', 'end_date', 'specialty_type', 'priority_level']
+
 class SurveyAnalysisViewSet(viewsets.ViewSet):
     filter_backends = [DjangoFilterBackend]
+    pagination_class = SurveyAnalysisPagination
+    filterset_class = AiSurveyRecipientFilter
 
     def list(self, request):
         # Get completed surveys with related data
@@ -34,21 +57,25 @@ class SurveyAnalysisViewSet(viewsets.ViewSet):
             survey_status='YES_RESPONSE',
             hospital=request.user.hospital
         ).select_related(
-            'triage_record', 
-            'triage_record__result',  
-            'patient',  
+            'triage_record',
+            'triage_record__result',
+            'patient',
         ).annotate(
             # Add any computed fields if needed
         )
 
         # Apply filters
         filtered_recipients = self.filterset_class(
-            request.GET, 
+            request.GET,
             queryset=completed_recipients
         ).qs
 
-        serializer = SurveyAnalysisListSerializer(filtered_recipients, many=True)
-        return Response(serializer.data)
+        # Add pagination
+        paginator = self.pagination_class()
+        paginated_recipients = paginator.paginate_queryset(filtered_recipients, request)
+        
+        serializer = SurveyAnalysisListSerializer(paginated_recipients, many=True)
+        return paginator.get_paginated_response(serializer.data)
     
     @action(detail=True, methods=['get'])
     def survey_detail(self, request, pk=None):
