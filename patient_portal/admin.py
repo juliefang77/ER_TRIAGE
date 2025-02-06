@@ -22,7 +22,7 @@ class PatientTriageSubmissionAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Patient Info', {
             'fields': (
-                'name_patient', 'gender', 'date_of_birth', 
+                'name_patient','patient_user' , 'gender', 'date_of_birth', 
                 'id_type', 'id_number', 'patient_phone',
                 'id_medical_insurance', 'id_hospital_card',
                 'insurance_type', 'patient_type'
@@ -55,7 +55,7 @@ class PatientTriageSubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(PatientUser)
 class PatientUserAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'name_patient', 'patient_phone', 'is_verified', 'is_active', 'date_joined')
+    list_display = ('id', 'phone', 'name_patient', 'patient_phone', 'is_verified', 'is_active', 'date_joined')
     list_filter = ('is_verified', 'is_active')
     search_fields = ('phone', 'patient__name_patient', 'patient__patient_phone')
     ordering = ('-date_joined',)

@@ -26,25 +26,15 @@ from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from django_filters import FilterSet  # Add this import
 from django_filters import FilterSet, CharFilter, ChoiceFilter  # Import specific filters
+
+# Import patient-specific authentication
+from .auth import PatientTokenAuthentication
+
 # 患者小filter
 class PatientBookingFilter(FilterSet):
     class Meta:
         model = BookingOnline
         fields = ['status']  # Fields that can be filtered
-
-# 患者app的自定义authentication
-from rest_framework.authentication import TokenAuthentication
-from ..models.patient_token import PatientToken
-
-class PatientTokenAuthentication(TokenAuthentication):
-    model = PatientToken  # Use our custom PatientToken model
-
-    def authenticate(self, request):
-        # Skip this auth method for non-patient endpoints
-        if not request.path.startswith('/apipatient/'):
-            return None
-            
-        return super().authenticate(request)
 
 
 # Payment success webhook
@@ -88,6 +78,36 @@ class BookingViewSet(viewsets.ModelViewSet):
         return BookingOnline.objects.filter(
             patient_user=self.request.user
         ).select_related('hospital')  # Add this for performance
+    
+    @action(detail=False, methods=['get'])
+    def upcoming(self, request):
+        """Get upcoming bookings (PATIENT_SUBMITTED or HOSPITAL_ACCEPTED)"""
+        queryset = self.get_queryset().filter(
+            status__in=['PATIENT_SUBMITTED', 'HOSPITAL_ACCEPTED']
+        ).order_by('start_time')  # Order by appointment time
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def historical(self, request):
+        """Get historical bookings (CONSULTATION_COMPLETED or CANCELLED)"""
+        queryset = self.get_queryset().filter(
+            status__in=['CONSULTATION_COMPLETED', 'CANCELLED']
+        ).order_by('-actual_time')  # Order by completion time, most recent first
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         """Create initial booking when patient selects time slot and hospital"""

@@ -16,6 +16,7 @@ from patient_portal.serializers.survey_serializer import (
 )
 from rest_framework.permissions import AllowAny
 
+# 患者查看问卷detail，并填survey提交
 class PatientSurveyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PatientSurveySerializer
     permission_classes = [AllowAny]  # Allow any access
@@ -85,9 +86,30 @@ class PatientSurveyListViewSet(viewsets.ReadOnlyModelViewSet):
 
         return FollowupSurvey.objects.filter(
             recipient__patient__patient_user__phone=phone,
-            # recipient__survey_status='NO_RESPONSE'
+            recipient__survey_status='NO_RESPONSE'
         ).select_related(
             'template', 
             'hospital', 
+            'recipient'
+        )
+
+# APP API: Historical survey list view light API （已完成的surveys）
+class PatientHistoricalSurveyListViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [AllowAny]
+    authentication_classes = []  # No authentication required
+    serializer_class = PatientSurveyListSerializer
+
+    def get_queryset(self):
+        # Get phone from request params
+        phone = self.request.query_params.get('phone')
+        if not phone:
+            return FollowupSurvey.objects.none()
+
+        return FollowupSurvey.objects.filter(
+            recipient__patient__patient_user__phone=phone,
+            recipient__survey_status='YES_RESPONSE'
+        ).select_related(
+            'template',
+            'hospital',
             'recipient'
         )

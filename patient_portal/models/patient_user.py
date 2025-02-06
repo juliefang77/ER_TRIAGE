@@ -12,25 +12,38 @@ class PatientUser(AbstractUser):
         null=True,
         blank=True
     )
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name='用户名',
+        null=True,
+        blank=True
+    )
+
     is_verified = models.BooleanField(
         default=False,
         verbose_name='是否验证',
         null=True,
         blank=True
     )
+
+    date_of_birth = models.DateField(
+        verbose_name='出生日期',
+        null=True,
+        blank=True
+    )
     
     # Make inherited fields nullable/blankable
     first_name = models.CharField(max_length=150, null=True, blank=True)
-    last_name = models.CharField(max_length=150, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
     password = models.CharField(max_length=128, null=True, blank=True)
     
     # Remove unused fields from AbstractUser
-    username = None
     is_staff = None
     is_superuser = None
     groups = None
     user_permissions = None
+    last_name = None
+    email = None
     
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []

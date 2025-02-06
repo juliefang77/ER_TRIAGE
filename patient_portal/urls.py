@@ -12,6 +12,8 @@ from .views import (
     PatientAuthToken,
     PatientRegisterView,
     PatientVerifyView,
+    AuthenticatedPatientTriageSubmissionViewSet,
+    PatientHistoricalSurveyListViewSet,
 )
 # Authentication
 from django.urls import path
@@ -21,6 +23,10 @@ router = DefaultRouter()
 # APP API: Patient submit form: /apipatient/patientsubmissions/
 router.register(r'patientsubmissions', PatientTriageSubmissionViewSet)
 
+# APP API: Logged in patient submits triage form
+router.register(r'authenticated-patient-submissions', AuthenticatedPatientTriageSubmissionViewSet, 
+    basename='authenticated-patient-submissions')  # Added unique basename
+
 # SaaS API: list all pending submitted forms: /apipatient/pendingsubmissions/
 router.register(r'pendingsubmissions', PendingSubmissionViewSet, basename='pending-submissions')
 
@@ -29,6 +35,13 @@ router.register(r'autofilltriage', PendingSubmissionDataViewSet, basename='autof
 
 # APP API: Patient gets survey list (light API)
 router.register(r'patient-surveys-list', PatientSurveyListViewSet, basename='patient-surveys-list')
+
+# APP API: Patient historical survey list (light API)
+router.register(
+    r'patient-historical-surveys-list', 
+    PatientHistoricalSurveyListViewSet, 
+    basename='patient-historical-surveys-list'
+)
 
 # APP API: Patient gets survey (detail view & submission)
 router.register(r'surveys', PatientSurveyViewSet, basename='patient-surveys')

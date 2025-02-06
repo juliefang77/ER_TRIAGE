@@ -5,6 +5,7 @@ from ..models import PatientTriageSubmission
 
 # Patient filling form 
 class PatientTriageSubmissionSerializer(serializers.ModelSerializer):
+    hospital_name = serializers.CharField(source='hospital.name', read_only=True)
 
     VALID_POSITIONS = ['L', 'B', 'C', 'A', 'H', 'P']  # Add all valid codes
     
@@ -12,6 +13,11 @@ class PatientTriageSubmissionSerializer(serializers.ModelSerializer):
         child=serializers.CharField(max_length=1),  # Limit to single character
         required=False,
         allow_empty=True,
+        allow_null=True
+    )
+    # Add read-only field for patient_user
+    patient_user = serializers.PrimaryKeyRelatedField(
+        read_only=True,
         allow_null=True
     )
 

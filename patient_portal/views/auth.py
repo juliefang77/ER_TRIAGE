@@ -80,3 +80,17 @@ class PatientVerifyView(APIView):
         except Exception as e:
             print(f"Error: {str(e)}")
             return Response({'error': str(e)}, status=400)
+
+# 患者app的自定义authentication
+from rest_framework.authentication import TokenAuthentication
+from ..models.patient_token import PatientToken
+
+class PatientTokenAuthentication(TokenAuthentication):
+    model = PatientToken  # Use our custom PatientToken model
+
+    def authenticate(self, request):
+        # Skip this auth method for non-patient endpoints
+        if not request.path.startswith('/apipatient/'):
+            return None
+            
+        return super().authenticate(request)

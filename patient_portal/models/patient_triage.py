@@ -2,9 +2,18 @@
 
 from django.db import models
 from triage.models import Hospital
+from .patient_user import PatientUser
 
 class PatientTriageSubmission(models.Model):
     # Choice Definitions
+    patient_user = models.ForeignKey(
+        PatientUser,
+        on_delete=models.SET_NULL,
+        verbose_name='患者用户',
+        null=True,
+        blank=True,
+        related_name='triage_submissions'
+    )
 
     STATUS_CHOICES = [
         ('PENDING', '待处理'),
@@ -248,6 +257,12 @@ class PatientTriageSubmission(models.Model):
         null=True,  
         blank=True,
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='创建时间',
+        null=True,  
+        blank=True
+    )
 
     class Meta:
         verbose_name = '患者分诊提交'
@@ -295,3 +310,5 @@ class PatientTriageSubmission(models.Model):
 # 18. patient_type | 身份标识 | CharField (choices)
 # 19. id
 # 20. status | 状态 ｜ 待处理、已通过
+# patient_user | foreign key
+# created_at | time stamp
