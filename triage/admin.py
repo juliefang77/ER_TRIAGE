@@ -231,7 +231,7 @@ class HospitalAdmin(admin.ModelAdmin):
                 'name',
                 'address',
                 'contact_number',
-                'is_active'
+                'is_active', 'city', 'district', 'level'
             ]
         })
     ]

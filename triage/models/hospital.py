@@ -29,6 +29,38 @@ class Hospital(models.Model):
         null=True,
         blank=True
     )
+    city = models.CharField(
+        max_length=50,
+        verbose_name='城市',
+        null=True,
+        blank=True
+    )
+
+    district = models.CharField(
+        max_length=50,
+        verbose_name='区',
+        null=True,
+        blank=True
+    )
+
+    HOSPITAL_LEVELS = [
+        ('A', '三甲医院'),
+        ('B', '三级医院'),
+        ('C', '二级医院'),
+        ('D', '一级医院'),
+        ('E', '未分级')
+    ]
+
+    level = models.CharField(
+        max_length=10,
+        choices=HOSPITAL_LEVELS,
+        verbose_name='医院等级',
+        null=True,
+        blank=True
+    )
+    # city 城市
+    # district 区
+    # level 医院等级：三甲医院、三级医院、二级医院、一级医院、未分级
 
     def __str__(self):
         return self.name

@@ -28,11 +28,10 @@ class PatientLoginSerializer(serializers.Serializer):
 
 class PatientRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    date_of_birth = serializers.DateField()  # Add this field
     
     class Meta:
         model = PatientUser
-        fields = ['phone', 'password', 'first_name', 'date_of_birth', 'username']
+        fields = ['phone', 'password', 'first_name']
 
     def create(self, validated_data):
         # Remove password from validated_data as we'll set it properly in the view
