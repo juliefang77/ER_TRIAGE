@@ -1,7 +1,7 @@
 # patient_portal/admin.py
 
 from django.contrib import admin
-from .models import PatientTriageSubmission, PatientUser
+from .models import PatientTriageSubmission, PatientUser, ErCompanion
 
 @admin.register(PatientTriageSubmission)
 class PatientTriageSubmissionAdmin(admin.ModelAdmin):
@@ -66,4 +66,27 @@ class PatientUserAdmin(admin.ModelAdmin):
 
     def patient_phone(self, obj):
         return obj.patient.patient_phone if obj.patient else '-'
+    patient_phone.short_description = '患者电话'
+
+
+@admin.register(ErCompanion)
+class ErCompanionAdmin(admin.ModelAdmin):
+    list_display = (
+        'patient_name',
+        'patient_phone',
+        'last_completed_step',
+        'payment_status',
+        'created_at'
+    )
+    
+    list_filter = ('payment_status', 'last_completed_step')
+    search_fields = ('patient_user__first_name', 'patient_user__phone')
+    ordering = ('-created_at',)
+
+    def patient_name(self, obj):
+        return obj.patient_user.first_name if obj.patient_user else '-'
+    patient_name.short_description = '患者姓名'
+
+    def patient_phone(self, obj):
+        return obj.patient_user.phone if obj.patient_user else '-'
     patient_phone.short_description = '患者电话'
