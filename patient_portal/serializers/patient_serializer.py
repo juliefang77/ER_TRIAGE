@@ -126,11 +126,3 @@ class PendingSubmissionMappingSerializer(serializers.ModelSerializer):
         }
         
         return mapped_data
-
-# Authentication
-class PatientLoginSerializer(serializers.Serializer):
-    phone = serializers.CharField()
-
-class VerifyCodeSerializer(serializers.Serializer):
-    phone = serializers.CharField()
-    code = serializers.CharField()

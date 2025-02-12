@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-import os
 from pathlib import Path
+import os
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -22,19 +22,19 @@ BAIDU_API_KEY = os.getenv('BAIDU_API_KEY')
 BAIDU_SECRET_KEY = os.getenv('BAIDU_SECRET_KEY')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wdm@sm65(l+7c*!mifkt=0ia436+gz7c^(yns6u_36%!9+)0-_'
+# SECRET_KEY = 'django-insecure-wdm@sm65(l+7c*!mifkt=0ia436+gz7c^(yns6u_36%!9+)0-_'  # Move to local.py
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True  # Move to local.py
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []  # Move to local.py and production.py
 
 
 # Application definition
@@ -59,6 +59,19 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# Add these new settings for drf-spectacular
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'ER Triage API',
+    'DESCRIPTION': 'ER Triage System API',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'DISABLE_ERRORS_AND_WARNINGS': True,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'SCHEMA_COERCE_PATH_PK_SUFFIX': True,
 }
 
 INSTALLED_APPS = [
@@ -93,6 +106,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware', # Serving admin static files
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -118,21 +132,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'er_triage_system',
-        'USER': 'root',
-        'PASSWORD': 'Juliefang7',  # Add your password if you have one
-        'HOST': 'localhost',
-        # 'HOST': 'host.docker.internal',  # This allows Docker container to connect to host machine's MySQL
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        }
-    }
-}
 
 
 # Password validation
@@ -177,17 +176,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Add these settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only
+# CORS_ALLOW_ALL_ORIGINS = True  # For development only
 # Or for more security, specify the allowed origin:
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:5173",
 # ]
 
 AUTH_USER_MODEL = 'triage.HospitalUser'
-
-ALIYUN_SMS = {
-    'ACCESS_KEY_ID': 'your_key_id',
-    'ACCESS_KEY_SECRET': 'your_key_secret',
-    'TEMPLATE_CODE': 'SMS_123456789',
-    'SIGN_NAME': '您的签名'
-}

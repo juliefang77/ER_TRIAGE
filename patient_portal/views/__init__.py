@@ -4,6 +4,7 @@ from .auth import PatientAuthToken, PatientRegisterView, PatientVerifyView
 from .survey import PatientSurveyViewSet, PatientSurveyListViewSet, PatientHistoricalSurveyListViewSet
 from .message import PatientMessageViewSet
 from .booking import BookingViewSet, HospitalBookingViewSet
+from .choose_hospital import HospitalListViewSet
 
 __all__ = [
     'PatientTriageSubmissionViewSet',
@@ -19,4 +20,5 @@ __all__ = [
     'PatientVerifyView',
     'AuthenticatedPatientTriageSubmissionViewSet',
     'PatientHistoricalSurveyListViewSet',
+    'HospitalListViewSet',
 ]

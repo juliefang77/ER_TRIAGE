@@ -14,6 +14,7 @@ from .views import (
     PatientVerifyView,
     AuthenticatedPatientTriageSubmissionViewSet,
     PatientHistoricalSurveyListViewSet,
+    HospitalListViewSet,
 )
 # Authentication
 from django.urls import path
@@ -48,6 +49,9 @@ router.register(r'surveys', PatientSurveyViewSet, basename='patient-surveys')
 
 # APP API: Patient gets messages
 router.register(r'messages', PatientMessageViewSet, basename='patient-messages')
+
+# APP API: Patient views hospital list, and chooses one to book from
+router.register(r'view-hospitals', HospitalListViewSet, basename='view-hospitals-list')
 
 # APP API: Patient makes booking and views bookings
 router.register(r'bookings', BookingViewSet, basename='patient-bookings')

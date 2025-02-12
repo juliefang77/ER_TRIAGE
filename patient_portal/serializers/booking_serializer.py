@@ -10,7 +10,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'hospital', 'hospital_name',  # Add hospital name for reading
             'date_of_birth', 'old_patient', 'complaint',
-            'start_time', 'end_time',
+            'start_time', 'end_time', 'reject_reason', 'actual_time',
             'status'  # Add status for reading
         ]
         read_only_fields = [
