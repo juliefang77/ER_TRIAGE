@@ -52,7 +52,9 @@ CSRF_COOKIE_SECURE = False
 '''CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Keep existing frontend local
     "http://localhost:3000",  # Common React port
-    # Add any other frontend URLs your colleague might use
+    
+    # Production
+    "https://app.cardiacsounds.cn"
 ]'''
 
 # OR for testing purposes:

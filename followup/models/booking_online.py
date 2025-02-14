@@ -107,15 +107,6 @@ class BookingOnline(models.Model):
                 self.actual_time = timezone.now()
         super().save(*args, **kwargs)
 
-    qr_code = models.CharField(
-        max_length=255, 
-        verbose_name='支付二维码编号',  # Changed to be more specific
-        default="NO.0257426067",    # Your fixed QR code number
-        null=True, 
-        blank=True
-    )
-
-    terminal_trace = models.CharField(max_length=100, verbose_name='终端流水号', null=True, blank=True)
 
     class Meta:
         verbose_name = '预约付费线上问诊'

@@ -14,7 +14,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
             'status'  # Add status for reading
         ]
         read_only_fields = [
-            'status', 'patient_user', 'terminal_trace', 'payment_id', 'hospital_name'
+            'status', 'patient_user', 'hospital_name'
         ]  # These can't be set by patient
 
 class BookingDetailSerializer(serializers.ModelSerializer):
@@ -36,7 +36,6 @@ class HospitalBookingSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'hospital', 'start_time', 'end_time', 'status', 'actual_time',
             'old_patient', 'complaint', 'date_of_birth', 'reject_reason',
-            'patient_name', 'patient_phone',  # Add the new fields
-            'terminal_trace', 'payment_id'
+            'patient_name', 'patient_phone'
         ]
-        read_only_fields = ['patient_user', 'terminal_trace', 'payment_id']
+        read_only_fields = ['patient_user']

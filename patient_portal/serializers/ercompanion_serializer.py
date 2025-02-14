@@ -14,5 +14,6 @@ class ErCompanionSerializer(serializers.ModelSerializer):
             'waiting_feel',
             'complete_step1',
             'complete_step2',
-            'complete_step3'
+            'complete_step3',
+            "last_completed_step"
         ]
