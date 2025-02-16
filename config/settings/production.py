@@ -48,7 +48,7 @@ SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
-# CORS Settings
+# CORS Settings (TBD later)
 '''CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Keep existing frontend local
     "http://localhost:3000",  # Common React port
@@ -59,6 +59,7 @@ CSRF_COOKIE_SECURE = False
 
 # OR for testing purposes:
 CORS_ALLOW_ALL_ORIGINS = True  # Simpler but less secure option
+CORS_ALLOW_CREDENTIALS = True
 
 # Aliyun SMS Settings
 ALIYUN_SMS = {

@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from triage.models import TriageRecord, VitalSigns, TriageResult, MedicalStaff
 from rest_framework.pagination import PageNumberPagination
@@ -21,6 +21,7 @@ class TriageHistoryPagination(PageNumberPagination):
 class TriageHistoryViewSet(viewsets.ModelViewSet):
     serializer_class = TriageHistorySerializer  # Full serializer
     pagination_class = TriageHistoryPagination
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return TriageRecord.objects.select_related(
@@ -34,10 +35,12 @@ class TriageHistoryViewSet(viewsets.ModelViewSet):
 class SaaSMedicalStaffViewSet(viewsets.ModelViewSet):
     queryset = MedicalStaff.objects.all()
     serializer_class = MedicalStaffSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 # 分诊记录list view
 class TriageHistoryListViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TriageHistoryListSerializer
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = TriageHistoryPagination
     filter_backends = [
         DjangoFilterBackend,

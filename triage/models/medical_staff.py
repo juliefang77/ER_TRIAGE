@@ -1,5 +1,4 @@
 from django.db import models
-import uuid
 
 class MedicalStaff(models.Model):
     ROLE_CHOICES = [
@@ -7,13 +6,6 @@ class MedicalStaff(models.Model):
         ('NUR', '护士'),
         ('ADM', '管理员'),
     ]
-
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-        verbose_name='唯一标识'
-    )
     hospital = models.ForeignKey(
         'Hospital',
         on_delete=models.CASCADE,

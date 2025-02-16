@@ -7,6 +7,7 @@ from .hospital import Hospital
 from .user import HospitalUser
 from .triage_historyinfo import TriageHistoryInfo
 from .mass_injury import MassInjury
+from .hospital_feedback import HospitalFeedback
 
 __all__ = [
     'Patient',
@@ -17,6 +18,7 @@ __all__ = [
     'Hospital',
     'HospitalUser',
     'TriageHistoryInfo',
-    'MassInjury'
+    'MassInjury',
+    'HospitalFeedback'
 ]
 

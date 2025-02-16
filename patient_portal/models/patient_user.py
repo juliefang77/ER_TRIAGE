@@ -9,7 +9,6 @@ class PatientUser(AbstractUser):
         ('M', '男'),
         ('F', '女'),
     ]
-
     ID_TYPES = [
         ('ID', '居民身份证'),
         ('HUKOU', '居民户口本'),
@@ -18,7 +17,7 @@ class PatientUser(AbstractUser):
         ('PASSPORT', '护照'),
         ('MILITARY', '军官证')
     ]
-
+    
     phone = models.CharField(
         max_length=20, 
         unique=True,
@@ -33,20 +32,17 @@ class PatientUser(AbstractUser):
         null=True,
         blank=True
     )
-
     is_verified = models.BooleanField(
         default=False,
         verbose_name='是否验证',
         null=True,
         blank=True
     )
-
     date_of_birth = models.DateField(
         verbose_name='出生日期',
         null=True,
         blank=True
     )
-
     gender = models.CharField(
         max_length=1, 
         choices=GENDER_CHOICES, 
@@ -55,7 +51,6 @@ class PatientUser(AbstractUser):
         null=True, 
         blank=True
     )
-
     id_type = models.CharField(
         max_length=10,
         choices=ID_TYPES,
@@ -64,17 +59,20 @@ class PatientUser(AbstractUser):
         null=True,
         blank=True
     )
-
     id_number = models.CharField(
         max_length=18, 
         verbose_name='证件号码',
         null=True,
         blank=True
     )
-
     id_medical_insurance = models.CharField(
         max_length=16,
         verbose_name='医保卡号',
+        null=True,
+        blank=True
+    )
+    profile_picture = models.IntegerField(
+        verbose_name='头像',
         null=True,
         blank=True
     )

@@ -16,6 +16,8 @@ from .views import (
     PatientHistoricalSurveyListViewSet,
     HospitalListViewSet,
     ErCompanionViewSet,
+    PatientProfileViewSet,
+    PatientFeedbackViewSet
 )
 # Authentication
 from django.urls import path
@@ -62,6 +64,12 @@ router.register(r'hospital-bookings', HospitalBookingViewSet, basename='hospital
 
 # APP API: ER companion 付费小莲花
 router.register(r'er-companion', ErCompanionViewSet, basename='er-companion')
+
+# APP API: 修改个人信息
+router.register(r'patient-profile', PatientProfileViewSet, basename='patient-profile')
+
+# APP API: 患者提交feedback
+router.register(r'patient-feedback', PatientFeedbackViewSet, basename='patient-feedback')
 
 urlpatterns = [
     path('', include(router.urls)),

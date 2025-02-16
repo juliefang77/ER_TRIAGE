@@ -2,6 +2,7 @@ from .auth import CustomAuthToken
 from .triage import SaaSTriageViewSet, SaaSPatientViewSet
 from .list import TriageHistoryPagination, TriageHistoryViewSet, SaaSMedicalStaffViewSet, TriageHistoryListViewSet
 from .mass_injury import MassInjuryViewSet
+from .feedback import HospitalFeedbackViewSet
 
 __all__ = [
     'CustomAuthToken',
@@ -11,5 +12,6 @@ __all__ = [
     'SaaSMedicalStaffViewSet',
     'SaaSPatientViewSet',
     'TriageHistoryListViewSet',
-    'MassInjuryViewSet'
+    'MassInjuryViewSet',
+    'HospitalFeedbackViewSet'
 ]

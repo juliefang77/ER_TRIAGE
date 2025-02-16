@@ -8,7 +8,8 @@ from triage.views import (
     TriageHistoryViewSet,
     SaaSPatientViewSet,
     TriageHistoryListViewSet,
-    MassInjuryViewSet
+    MassInjuryViewSet,
+    HospitalFeedbackViewSet
 )
 
 router = DefaultRouter()
@@ -26,6 +27,9 @@ router.register(r'triagehistory', TriageHistoryViewSet, basename='triage-history
 
 # Mass injury list GET 
 router.register(r'mass-injuries', MassInjuryViewSet, basename='mass-injury')
+
+# 医院给我们feedback
+router.register(r'hospital-feedback', HospitalFeedbackViewSet, basename='hospital-feedback')
 
 urlpatterns = [
     path('', include(router.urls)),

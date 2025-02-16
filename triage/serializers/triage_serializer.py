@@ -62,13 +62,18 @@ class VitalSignsSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        
+
         if instance.injury_position:
-            # Clean and process the string
-            cleaned = instance.injury_position.replace("'", "").replace("[", "").replace("]", "")
-            positions = [pos.strip() for pos in cleaned.split(',') if pos.strip()]
-            ret['injury_position'] = positions
-                
+            # If it's already a list, use it directly
+            if isinstance(instance.injury_position, list):
+                ret['injury_position'] = instance.injury_position
+            # If it's a string, process it
+            else:
+                # Clean and process the string
+                cleaned = instance.injury_position.replace("'", "").replace("[", "").replace("]", "")
+                positions = [pos.strip() for pos in cleaned.split(',') if pos.strip()]
+                ret['injury_position'] = positions
+
         return ret
 
     class Meta:

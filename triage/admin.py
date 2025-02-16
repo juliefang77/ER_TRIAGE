@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.contrib.auth.admin import UserAdmin
-from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser, TriageHistoryInfo, MassInjury
+from .models import Patient, TriageRecord, TriageResult, VitalSigns, MedicalStaff, Hospital, HospitalUser, TriageHistoryInfo, MassInjury, HospitalFeedback
 
 class VitalSignsInline(admin.StackedInline):
     model = VitalSigns
@@ -269,6 +269,19 @@ class MassInjuryAdmin(admin.ModelAdmin):
     list_display = ['mass_name', 'mass_type', 'mass_time', 'mass_number']
     list_filter = ['mass_type']
     search_fields = ['mass_name', 'mass_notes']
+
+@admin.register(HospitalFeedback)
+class HospitalFeedbackAdmin(admin.ModelAdmin):
+    list_display = ['get_user_name', 'contact', 'request_type', 'created_at']
+    list_filter = ['request_type', 'created_at']
+    search_fields = ['hospital_user__name', 'contact', 'contact_phone', 'request_content']
+
+    def get_user_name(self, obj):
+        if obj.hospital_user:
+            return obj.hospital_user.name
+        return '-'
+    get_user_name.short_description = '医院用户名称'
+    get_user_name.admin_order_field = 'hospital_user__name'
 
 # Register all models
 admin.site.register(Patient, PatientAdmin)

@@ -6,6 +6,8 @@ from .message import PatientMessageViewSet
 from .booking import BookingViewSet, HospitalBookingViewSet
 from .choose_hospital import HospitalListViewSet
 from .er_companion import ErCompanionViewSet
+from .patient_profile import PatientProfileViewSet
+from .feedback import PatientFeedbackViewSet
 
 __all__ = [
     'PatientTriageSubmissionViewSet',
@@ -23,4 +25,6 @@ __all__ = [
     'PatientHistoricalSurveyListViewSet',
     'HospitalListViewSet',
     'ErCompanionViewSet',
+    'PatientProfileViewSet',
+    'PatientFeedbackViewSet',
 ]
