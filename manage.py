@@ -2,11 +2,10 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from dotenv import load_dotenv
 
-
-#!/usr/bin/env python
-import os
-import sys
+# Load environment variables from .env file
+load_dotenv()
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')

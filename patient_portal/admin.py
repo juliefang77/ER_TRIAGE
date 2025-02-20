@@ -55,18 +55,14 @@ class PatientTriageSubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(PatientUser)
 class PatientUserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'phone', 'name_patient', 'patient_phone', 'is_verified', 'is_active', 'date_joined')
+    list_display = ('id', 'phone', 'first_name', 'patient_phone', 'is_verified', 'is_active', 'date_joined')
     list_filter = ('is_verified', 'is_active')
     search_fields = ('phone', 'patient__name_patient', 'patient__patient_phone')
     ordering = ('-date_joined',)
 
-    def name_patient(self, obj):
-        return obj.patient.name_patient if obj.patient else '-'
-    name_patient.short_description = '患者姓名'
-
     def patient_phone(self, obj):
         return obj.patient.patient_phone if obj.patient else '-'
-    patient_phone.short_description = '患者电话'
+    patient_phone.short_description = '患者电话(matched Patient)'
 
 
 @admin.register(ErCompanion)

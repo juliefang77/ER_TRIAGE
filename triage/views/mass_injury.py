@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response  # Add this import
 from ..models import MassInjury
 from django.db.models import Count
@@ -34,9 +34,10 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 
 class MassInjuryViewSet(viewsets.ModelViewSet):
-    pagination_class = StandardResultsSetPagination  # Add this line
-    filterset_class = MassInjuryFilter  # Add this line
-    filter_backends = [DjangoFilterBackend]  # Add this line
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [permissions.IsAuthenticated]
+    filterset_class = MassInjuryFilter
+    filter_backends = [DjangoFilterBackend]
 
     def get_serializer_class(self):
         if self.action == 'create':

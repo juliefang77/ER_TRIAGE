@@ -45,15 +45,15 @@ class SurveyAnalysisService:
 
         data = {
             'messages': [{'role': 'user', 'content': prompt}],
-            'temperature': 0.3,
-            'top_p': 0.5,
-            'penalty_score': 1.2,
+            'temperature': 0.2,
+            'top_p': 0.3,
+            'penalty_score': 1.4,
             'system': "你是一位在中国的医生，正在分析多位病人的随访问卷。请总结他们的恢复情况，指出需要特别关注的问题，并提出后续随访建议。",
             'stream': False,
             'stop': ["结束", "完成"],
             'max_output_tokens': 800,  # Increased for multiple surveys
-            'frequency_penalty': 0.3,
-            'presence_penalty': 0.1,
+            'frequency_penalty': 0.4,
+            'presence_penalty': 0.2,
             'metadata': {
                 'source': 'followup_system',
                 'type': 'survey_analysis'

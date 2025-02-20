@@ -9,7 +9,9 @@ from triage.views import (
     SaaSPatientViewSet,
     TriageHistoryListViewSet,
     MassInjuryViewSet,
-    HospitalFeedbackViewSet
+    HospitalFeedbackViewSet,
+    IDCardViewSet,
+    SocialSecurityViewSet
 )
 
 router = DefaultRouter()
@@ -30,6 +32,10 @@ router.register(r'mass-injuries', MassInjuryViewSet, basename='mass-injury')
 
 # 医院给我们feedback
 router.register(r'hospital-feedback', HospitalFeedbackViewSet, basename='hospital-feedback')
+
+# Scan身份证 & 社保卡
+router.register(r'id-card', IDCardViewSet, basename='id-card')
+router.register(r'social-security', SocialSecurityViewSet, basename='social-security')
 
 urlpatterns = [
     path('', include(router.urls)),

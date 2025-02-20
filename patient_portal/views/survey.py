@@ -32,7 +32,7 @@ class PatientSurveyViewSet(viewsets.ReadOnlyModelViewSet):
         return FollowupSurvey.objects.filter(
             recipient__patient__patient_user__phone=phone,
             recipient__survey_status='NO_RESPONSE'
-        ).select_related('template', 'hospital')
+        ).select_related('template', 'hospital') # add recipient here?
 
 
     @action(detail=True, methods=['post'])

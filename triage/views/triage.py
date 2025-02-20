@@ -1,6 +1,6 @@
 from triage.models import Patient, TriageRecord, TriageResult, VitalSigns, TriageHistoryInfo, HospitalUser, Hospital
 from triage.serializers.triage_serializer import TriageRecordSerializer, PatientSerializer
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from patient_portal.models import PatientTriageSubmission
 
 # Not used
@@ -11,14 +11,13 @@ class SaaSPatientViewSet(viewsets.ModelViewSet):
 # 新建分诊
 class SaaSTriageViewSet(viewsets.ModelViewSet):
     queryset = TriageRecord.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TriageRecordSerializer
 
     def perform_create(self, serializer):
         user = self.request.user
         hospital = user.hospital  # Get hospital from user
-        print("Received data:", self.request.data)  # Shows raw incoming data
-        print("Serializer data:", serializer.validated_data)  # Shows data after validation
-        
+        # print("Received data:", self.request.data)  # Shows raw incoming data
 
         # Get the original submission pk from the URL or request data
         patient_submission_pk = self.request.data.get('patient_submission_id') 
@@ -68,7 +67,6 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
             )
         
         # Add history info creation
-        print("History info data:", history_info_data)  # Check what data is received
         if history_info_data:
             TriageHistoryInfo.objects.create(
                 triage_record=triage_record,
@@ -89,3 +87,4 @@ class SaaSTriageViewSet(viewsets.ModelViewSet):
             'vitalsigns',
             'history_info'
         ).filter(hospital=self.request.user.hospital)  # Filter by user's hospital
+

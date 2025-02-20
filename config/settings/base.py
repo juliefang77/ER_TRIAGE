@@ -18,8 +18,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get credentials from environment variables
-BAIDU_API_KEY = os.getenv('BAIDU_API_KEY')
-BAIDU_SECRET_KEY = os.getenv('BAIDU_SECRET_KEY')
+# BAIDU_API_KEY = os.getenv('BAIDU_API_KEY')
+# BAIDU_SECRET_KEY = os.getenv('BAIDU_SECRET_KEY')
+
+BAIDU_API_KEY = 'PNndBDHfEf9XA3kp0hQLEuDJ'
+BAIDU_SECRET_KEY = 'MqHQ7UrUYRCqYFGtwA7Oo5CYkS1PWHUn'
+
+# Baidu OCR Settings
+ID_BAIDU_KEY = '6dCnNSXboAspakYnmbLJzN4b'
+ID_BAIDU_SECRET = 'XbB4doWo2dbRWQvdl3xhbW37qPnzPmuL'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -100,6 +107,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Add this at the top
     'django.middleware.security.SecurityMiddleware',
+    # 'core.middleware.ratelimit.RateLimitMiddleware',  # Rate limit
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -108,6 +116,25 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'whitenoise.middleware.WhiteNoiseMiddleware', # Serving admin static files
 ]
+
+# Add default cache configuration
+'''CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',  # Using docker service name
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# Simplified rate limiting settings with equal limits
+RATE_LIMIT = {
+    'DEFAULT': {
+        'requests': 1000,  # 1000 requests
+        'window': 3600,    # per hour
+    }
+}'''
 
 ROOT_URLCONF = 'config.urls'
 

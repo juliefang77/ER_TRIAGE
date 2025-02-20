@@ -43,6 +43,7 @@ class StandardQuestionAdmin(admin.ModelAdmin):
 @admin.register(SurveyTemplate)
 class SurveyTemplateAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'survey_name',
         'hospital',
         'created_by',

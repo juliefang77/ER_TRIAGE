@@ -4,7 +4,6 @@ from .models import TriageRecord, MassInjury
 class TriageRecordFilter(filters.FilterSet):
     # Existing date range filters
     def filter_queryset(self, queryset):
-        print("Initial queryset count:", queryset.count())
         
         # Handle list values from QueryDict
         if 'start_date' in self.data:
@@ -13,7 +12,6 @@ class TriageRecordFilter(filters.FilterSet):
                 start_date = start_date[0]    # Take first value
             self.data = dict(self.data)       # Make mutable copy
             self.data['start_date'] = start_date
-            print("Using start_date:", start_date)
 
         if 'end_date' in self.data:
             end_date = self.data.get('end_date')
@@ -21,10 +19,8 @@ class TriageRecordFilter(filters.FilterSet):
                 end_date = end_date[0]         # Take first value
             self.data = dict(self.data)        # Make mutable copy
             self.data['end_date'] = end_date
-            print("Using end_date:", end_date)
 
         filtered = super().filter_queryset(queryset)
-        print("Final queryset count:", filtered.count())
         return filtered
 
     start_date = filters.CharFilter(field_name='registration_time', lookup_expr='gte')
@@ -74,19 +70,5 @@ class TriageRecordFilter(filters.FilterSet):
             'name_patient',
             'guahao_status'
         ]
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        print("Filter data received:", self.data)
-        
-    def filter_queryset(self, queryset):
-        print("Initial queryset count:", queryset.count())
-        if 'name_patient' in self.data:
-            print("Filtering by name:", self.data['name_patient'])
-        if 'priority_level' in self.data:
-            print("Filtering by priority:", self.data['priority_level'])
-        
-        filtered = super().filter_queryset(queryset)
-        print("Final queryset count:", filtered.count())
-        return filtered
+
     

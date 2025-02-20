@@ -67,10 +67,6 @@ class AIFollowupNotesViewSet(viewsets.ViewSet):
                 'patient_phone',
                 'date_of_birth'
             )[:10]  # Limit to 10 results
-
-            # Add print for debugging
-            print(f"Search query: {query}")
-            print(f"Found patients: {patients}")
             
             # Format the results
             results = [{
